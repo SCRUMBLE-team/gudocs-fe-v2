@@ -5,7 +5,7 @@ import HomePage from "./routes/home";
 
 function App() {
   return (
-    <div className="max-w-120 m-auto min-h-dvh bg-white shadow-[0_0_20px_#0000000d]">
+    <div className="app-scroll max-w-120 overflow-auto m-auto h-dvh bg-white shadow-[0_0_20px_#0000000d]">
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/landing" element={<LandingPage />} />

@@ -20,12 +20,11 @@ export function TabBarRoot({ value, onChange, children }: TabBarProps) {
     <TabBarContext.Provider value={{ value, onChange }}>
       <nav
         aria-label="하단 탭 메뉴"
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-4"
-        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 16px)" }}
+        className="bg-white fixed inset-x-0 bottom-0 z-50 flex justify-center"
       >
         <ul
           role="tablist"
-          className="pointer-events-auto flex w-full max-w-100 items-center justify-between rounded-full bg-white py-2 pr-3 pl-3 shadow-[0_2px_8px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.12)]"
+          className="flex w-full max-w-120 items-center justify-between rounded-t-3xl  px-3 pt-2 border-t-2 border-x-2 border-blue-50"
         >
           {children}
         </ul>

@@ -33,7 +33,7 @@ export function TabBarItem({
         onClick={() => onChange(value)}
         className={`flex w-full flex-col items-center gap-0.5 rounded-full py-1.5 transition-transform active:scale-95 ${className ?? ""}`}
         style={{
-          color: isActive ? colors.blue500 : colors.grey400,
+          color: isActive ? colors.blue700 : colors.grey400,
           outline: "none",
         }}
         {...props}
