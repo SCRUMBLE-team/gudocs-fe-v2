@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+button {
+  &:focus {
+    outline: none !important;
+  }
+}
+
 .app-scroll {
   scrollbar-width: thin;
   scrollbar-color: #d1d5db transparent;
