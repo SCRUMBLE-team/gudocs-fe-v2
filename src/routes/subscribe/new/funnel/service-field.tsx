@@ -1,81 +1,58 @@
+import { useState } from "react";
+import SheetSelectField from "../../../../components/line-field/sheet-select-field";
+import LineTextField from "../../../../components/line-field/line-text-field";
 import { CATEGORY_SERVICES } from "../../../../constants/category";
-import { BottomSheet, ListRow, TextField } from "@toss/tds-mobile";
-import { useCallback, useRef, useState } from "react";
 import { useSubscribeContext } from "../subscribe-context";
 
 function ServiceField() {
   const { category, service, onChangeService } =
     useSubscribeContext("ServiceField");
-  const [open, setOpen] = useState<boolean>(false);
-  const [custom, setCustom] = useState<boolean>(false);
+  const [custom, setCustom] = useState(false);
   const [prevCategory, setPrevCategory] = useState(category);
-  const inputRef = useRef<HTMLInputElement>(null);
 
+  // 카테고리가 바뀌면 고른 서비스는 무효가 되므로 초기화한다.
   if (category !== prevCategory) {
     setPrevCategory(category);
     setCustom(category === "ETC");
-    setOpen(category !== null && category !== "ETC");
     onChangeService("");
   }
 
-  const setInputRef = useCallback((node: HTMLInputElement) => {
-    inputRef.current = node;
-    inputRef.current?.focus();
-  }, []);
-
   if (!category) {
-    return <></>;
+    return null;
   }
 
-  const editable = custom || category === "ETC";
+  if (custom || category === "ETC") {
+    return (
+      <LineTextField
+        label="서비스"
+        placeholder="서비스명"
+        value={service ?? ""}
+        onChange={onChangeService}
+        hasAutoFocus
+      />
+    );
+  }
+
+  const options = CATEGORY_SERVICES[category].map((name) => ({
+    value: name,
+    label: name,
+  }));
 
   return (
-    <div>
-      <TextField
-        ref={setInputRef}
-        variant="line"
-        label="서비스"
-        labelOption="appear"
-        placeholder="서비스명"
-        value={service ? service : ""}
-        readOnly={!editable}
-        onClick={() => {
-          if (editable) return;
-          setOpen(!open);
-        }}
-        onChange={(e) => {
-          const serviceName = e.target.value;
-          onChangeService(serviceName);
-        }}
-      />
-      <BottomSheet
-        open={open}
-        onClose={() => setOpen(false)}
-        portalContainer={document.getElementById("app-root")}
-      >
-        {CATEGORY_SERVICES[category].map((serviceName) => (
-          <ListRow
-            key={serviceName}
-            contents={<ListRow.Texts type="1RowTypeA" top={serviceName} />}
-            onClick={() => {
-              setCustom(false);
-              onChangeService(serviceName);
-              setOpen(false);
-            }}
-          />
-        ))}
-        <ListRow
-          left={<ListRow.AssetIcon name="icon-plus-circle" />}
-          contents={<ListRow.Texts type="1RowTypeA" top={"직접입력"} />}
-          onClick={() => {
-            setCustom(true);
-            onChangeService("");
-            setOpen(false);
-            requestAnimationFrame(() => inputRef.current?.focus());
-          }}
-        />
-      </BottomSheet>
-    </div>
+    <SheetSelectField
+      label="서비스"
+      placeholder="서비스명"
+      options={options}
+      value={service}
+      onChange={onChangeService}
+      footerAction={{
+        label: "직접 입력",
+        onSelect: () => {
+          setCustom(true);
+          onChangeService("");
+        },
+      }}
+    />
   );
 }
 

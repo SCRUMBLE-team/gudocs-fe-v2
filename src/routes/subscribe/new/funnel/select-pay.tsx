@@ -1,6 +1,7 @@
-import { FixedBottomCTA, ListHeader } from "@toss/tds-mobile";
-import { colors } from "@toss/tds-colors";
 import { useNavigate } from "react-router-dom";
+import { VStack } from "@astryxdesign/core/VStack";
+import { Heading } from "@astryxdesign/core/Heading";
+import FixedBottomCTA from "../../../../components/fixed-bottom-cta";
 import { useSubscribeContext } from "../subscribe-context";
 import { toSubscribePayload } from "../to-subscribe-payload";
 import BillingCycleField from "./billing-cycle-field";
@@ -32,29 +33,21 @@ function SelectPay() {
   }
 
   return (
-    <>
-      <ListHeader
-        className="mb-3"
-        size="large"
-        title={
-          <ListHeader.TitleParagraph color={colors.grey800} fontWeight="bold">
-            {title}
-          </ListHeader.TitleParagraph>
-        }
-      />
-      <PriceField />
-      <BillingCycleField />
-      <BillingDateField />
-      {payload && (
-        <FixedBottomCTA
-          takeSpace={true}
-          showAfterDelay={{ animation: "slide", delay: 0 }}
-          onTap={handleSubmit}
-        >
-          등록하기
-        </FixedBottomCTA>
-      )}
-    </>
+    <VStack className="flex-1">
+      <VStack paddingInline={4} paddingBlock={2} gap={5}>
+        <Heading level={2} className="whitespace-pre-line">
+          {title}
+        </Heading>
+
+        <VStack gap={2}>
+          <PriceField />
+          <BillingCycleField />
+          <BillingDateField />
+        </VStack>
+      </VStack>
+
+      {payload && <FixedBottomCTA label="등록하기" onClick={handleSubmit} />}
+    </VStack>
   );
 }
 

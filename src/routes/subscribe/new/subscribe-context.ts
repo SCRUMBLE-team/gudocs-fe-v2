@@ -13,7 +13,8 @@ export type SubscribeContextValue = {
   price: number | null;
   onChangePrice: (value: number | null) => void;
   paymentDate: Date | null;
-  onChangePaymentDate: (value: Date) => void;
+  // DateInput은 선택 해제를 지원하므로 null도 받는다.
+  onChangePaymentDate: (value: Date | null) => void;
   onChangeStep: (value: SubscribeStep) => void;
 };
 

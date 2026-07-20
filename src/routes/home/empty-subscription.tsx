@@ -1,26 +1,32 @@
-import { colors } from "@toss/tds-colors";
-import { Paragraph, Button } from "@toss/tds-mobile";
-import Card from "../../components/card";
-import SubscribeImage from "../../assets/subscribe.svg?react";
+import { Card } from "@astryxdesign/core/Card";
+import { VStack } from "@astryxdesign/core/VStack";
+import { Text } from "@astryxdesign/core/Text";
+import { Button } from "@astryxdesign/core/Button";
 import { useNavigate } from "react-router-dom";
+import Lottie from "lottie-react";
+import emptyLottie from "../../assets/lottie/empty.json";
 
 function EmptySubscription() {
   const navigate = useNavigate();
+
   return (
-    <Card className="flex flex-col items-center">
-      <SubscribeImage className="w-48 h-48" />
-      <Paragraph typography="t5" fontWeight="bold">
-        <Paragraph.Text color={colors.grey900}>
+    <Card className="border-gray-300">
+      <VStack align="center" gap={2}>
+        <Lottie
+          animationData={emptyLottie}
+          loop
+          style={{ width: 200, height: 200 }}
+        />
+        <Text type="large" weight="bold">
           아직 등록하신 구독 서비스가 없어요
-        </Paragraph.Text>
-      </Paragraph>
-      <Button
-        onClick={() => navigate("/subscribe/new")}
-        display="block"
-        size="medium"
-      >
-        구독 서비스 등록하러가기
-      </Button>
+        </Text>
+        <Button
+          className="w-full p-6 "
+          label="구독 서비스 등록하러가기"
+          variant="primary"
+          onClick={() => navigate("/subscribe/new")}
+        />
+      </VStack>
     </Card>
   );
 }

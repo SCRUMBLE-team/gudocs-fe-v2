@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
+import { HStack } from "@astryxdesign/core/HStack";
 import { TabBarContext } from "./tab-bar-context";
 
 /**
- * 토스 미니앱 UI/UX 가이드: 탭바는 필수 컴포넌트가 아니지만, 사용한다면 토스가 제공하는
- * 플로팅 형태를 그대로 유지해야 해요. (기본 하단 탭과 겹치면 사용자가 현재 위치를 혼동할 수 있어요.)
- * 탭 개수는 최소 2개, 최대 5개를 권장해요.
+ * 하단 고정 탭바. Astryx에는 모바일 하단 탭바 대응 컴포넌트가 없어서
+ * HStack + Icon + Text 프리미티브로 직접 구성한다.
+ * 탭 개수는 최소 2개, 최대 5개를 권장한다.
  */
 export type TabBarProps = {
   /** 현재 선택된 TabBar.Item의 value */
@@ -18,17 +19,16 @@ export type TabBarProps = {
 export function TabBarRoot({ value, onChange, children }: TabBarProps) {
   return (
     <TabBarContext.Provider value={{ value, onChange }}>
-      <nav
+      <HStack
+        as="nav"
+        role="tablist"
         aria-label="하단 탭 메뉴"
-        className="bg-white fixed inset-x-0 bottom-0 z-50 flex justify-center"
+        paddingInline={3}
+        align="center"
+        className="sticky bottom-0 z-50 border-t border-gray-300 rounded-t-lg bg-surface"
       >
-        <ul
-          role="tablist"
-          className="flex w-full max-w-120 items-center justify-between rounded-t-3xl  px-3 pt-2 border-t-2 border-x-2 border-blue-50"
-        >
-          {children}
-        </ul>
-      </nav>
+        {children}
+      </HStack>
     </TabBarContext.Provider>
   );
 }

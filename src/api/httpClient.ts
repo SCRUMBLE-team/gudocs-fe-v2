@@ -6,8 +6,17 @@ interface HttpOptions {
   body?: unknown; // JS 객체 or FormData 등
 }
 
+// 끝 슬래시 제거 — path의 앞 슬래시와 겹치지 않도록
+const BASE_URL = (import.meta.env.VITE_BASE_URL ?? "").replace(/\/+$/, "");
+
+function resolveUrl(path: string) {
+  // 절대 URL이면 그대로 사용
+  if (/^https?:\/\//.test(path)) return path;
+  return `${BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 async function baseFetch<T>(
-  url: string,
+  path: string,
   options: HttpOptions = {},
 ): Promise<T> {
   const defaultHeaders: HeadersInit = {
@@ -31,7 +40,7 @@ async function baseFetch<T>(
     credentials: "include",
   };
 
-  const res = await fetch(url, init);
+  const res = await fetch(resolveUrl(path), init);
 
   // 공통 에러 처리
   if (!res.ok) {
