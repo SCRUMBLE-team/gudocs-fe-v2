@@ -11,6 +11,7 @@ export type SubscribeCategoryLabel = SubscribeCategoryMeta["label"];
 
 export type BillingCycle = "MONTHLY" | "YEARLY";
 export type PaymentMethod = "CARD" | "BANK_TRANSFER" | "SIMPLE_PAY" | "ETC";
+export type SubscribeStatus = "ACTIVE" | "PAUSED";
 
 /** 구독 등록 요청 본문 */
 export type CreateSubscribePayload = {
@@ -18,8 +19,14 @@ export type CreateSubscribePayload = {
   service: string;
   price: number;
   billingCycle: BillingCycle;
-  /** 1-31 */
   billingDay: number;
-  /** 1-12. billingCycle이 MONTHLY면 null */
   billingMonth: number | null;
 };
+
+// 서버 응답 — 서버 할당 필드 포함
+export interface SubscriptionDetail extends CreateSubscribePayload {
+  id: number;
+  status: SubscribeStatus;
+  createdAt: string;
+  updatedAt: string;
+}
