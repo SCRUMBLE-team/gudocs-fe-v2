@@ -1,11 +1,15 @@
-import { Asset } from "@toss/tds-mobile";
+import Lottie from "lottie-react";
 import { useNavigate } from "react-router-dom";
+import { VStack } from "@astryxdesign/core/VStack";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Text } from "@astryxdesign/core/Text";
 import documentLottie from "../../assets/lottie/document.json";
 import kakaoLogo from "../../assets/logo/kakao.png";
 import naverLogo from "../../assets/logo/naver.png";
 import googleLogo from "../../assets/logo/google.png";
-import { Paragraph } from "@toss/tds-mobile";
 
+// 소셜 로그인 버튼은 각 사업자의 브랜드 가이드가 색을 고정하므로
+// 디자인 시스템 토큰이 아니라 지정된 브랜드 색을 그대로 쓴다.
 const SOCIAL_LOGIN_PROVIDERS = [
   {
     name: "kakao",
@@ -23,7 +27,7 @@ const SOCIAL_LOGIN_PROVIDERS = [
     name: "google",
     label: "Google로 시작하기",
     logo: googleLogo,
-    className: "bg-white text-[#1F1F1F] border border-gray-200",
+    className: "bg-white text-[#1F1F1F] border border-default",
   },
 ] as const;
 
@@ -35,35 +39,41 @@ function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center h-dvh justify-center gap-3">
-      <div>
-        <Asset.Lottie
-          frameShape={{
-            height: 300,
-            width: 300,
-          }}
-          scaleType="crop"
-          src={documentLottie}
+    <VStack className="flex-1" justify="center" align="center" gap={3} padding={4}>
+      <VStack align="center">
+        <Lottie
+          animationData={documentLottie}
+          loop
+          style={{ width: 300, height: 300 }}
         />
-        <Paragraph typography="t2" textAlign="center" fontWeight="bold">
-          <Paragraph.Text>{`똑똑한 구독\n똑구로 시작하세요`}</Paragraph.Text>
-        </Paragraph>
-      </div>
-      <div className="flex flex-col gap-3 w-84 mt-8">
+        <Text
+          type="display-3"
+          weight="bold"
+          justify="center"
+          className="whitespace-pre-line"
+        >
+          {"똑똑한 구독\n똑구로 시작하세요"}
+        </Text>
+      </VStack>
+
+      <VStack gap={3} width="100%" className="mt-8">
         {SOCIAL_LOGIN_PROVIDERS.map(({ name, label, logo, className }) => (
-          <button
-            style={{ borderRadius: "12px", outline: "none" }}
+          <HStack
+            as="button"
             key={name}
-            type="button"
             onClick={handleSocialLogin}
-            className={`flex items-center justify-center gap-3 h-13 font-medium outline-none ${className}`}
+            gap={3}
+            justify="center"
+            align="center"
+            height={52}
+            className={`rounded-xl font-medium ${className}`}
           >
             <img src={logo} alt="" className="object-contain" />
             <span>{label}</span>
-          </button>
+          </HStack>
         ))}
-      </div>
-    </div>
+      </VStack>
+    </VStack>
   );
 }
 

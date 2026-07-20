@@ -22,8 +22,12 @@ export async function getSubscriptions({
   category?: SubscribeCategory;
   status?: SubscribeStatus;
 }) {
+  const params = new URLSearchParams();
+  if (category) params.set("category", category);
+  if (status) params.set("status", status);
+
   const response = await http.get<ApiResponse<SubscriptionDetail[]>>(
-    `/api/subscriptions?category=${category}&status=${status}`,
+    `/api/subscriptions?${params}`,
   );
   return response.data;
 }

@@ -1,5 +1,6 @@
-import { FixedBottomCTA, ListHeader } from "@toss/tds-mobile";
-import { colors } from "@toss/tds-colors";
+import { VStack } from "@astryxdesign/core/VStack";
+import { Heading } from "@astryxdesign/core/Heading";
+import FixedBottomCTA from "../../../../components/fixed-bottom-cta";
 import CategoryField from "./category-field";
 import ServiceField from "./service-field";
 import { useSubscribeContext } from "../subscribe-context";
@@ -13,29 +14,25 @@ function SelectService() {
     : "어떤 서비스를\n구독하고 계신가요?";
 
   return (
-    <>
-      <ListHeader
-        className="mb-3"
-        size="large"
-        title={
-          <ListHeader.TitleParagraph color={colors.grey800} fontWeight="bold">
-            {title}
-          </ListHeader.TitleParagraph>
-        }
-        rightAlignment="center"
-      />
-      <CategoryField />
-      <ServiceField />
+    <VStack className="flex-1">
+      <VStack paddingInline={4} paddingBlock={2} gap={5}>
+        <Heading level={2} className="whitespace-pre-line">
+          {title}
+        </Heading>
+
+        <VStack gap={2}>
+          <CategoryField />
+          <ServiceField />
+        </VStack>
+      </VStack>
+
       {category && service && (
         <FixedBottomCTA
-          takeSpace={true}
-          showAfterDelay={{ animation: "slide", delay: 0 }}
-          onTap={() => onChangeStep("select_pay")}
-        >
-          다음으로
-        </FixedBottomCTA>
+          label="다음으로"
+          onClick={() => onChangeStep("select_pay")}
+        />
       )}
-    </>
+    </VStack>
   );
 }
 

@@ -1,14 +1,17 @@
 import { Routes, Route } from "react-router-dom";
+import { VStack } from "@astryxdesign/core/VStack";
+import HomePage from "./routes/home";
 import LandingPage from "./routes/landing";
 import LoginPage from "./routes/login";
-import HomePage from "./routes/home";
 import SubscribeNewPage from "./routes/subscribe/new";
 
 function App() {
   return (
-    <div
+    <VStack
       id="app-root"
-      className="app-scroll max-w-120 overflow-auto m-auto h-dvh bg-white shadow-[0_0_20px_#0000000d] contain-layout"
+      height="100dvh"
+      maxWidth={480}
+      className="relative mx-auto overflow-hidden bg-surface shadow-lg"
     >
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -16,7 +19,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/subscribe/new" element={<SubscribeNewPage />} />
       </Routes>
-    </div>
+    </VStack>
   );
 }
 

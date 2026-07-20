@@ -1,6 +1,9 @@
-import { TopNavigation, TopNavigationBackButton } from "@toss/tds-mobile";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { VStack } from "@astryxdesign/core/VStack";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Icon } from "@astryxdesign/core/Icon";
+import { IconButton } from "@astryxdesign/core/IconButton";
 import {
   type BillingCycle,
   type SubscribeCategory,
@@ -37,43 +40,35 @@ function SubscribeNewPage() {
   }
 
   return (
-    <div>
-      <SubscribeContext.Provider
-        value={{
-          category,
-          onChangeCategory: setCategory,
-          service,
-          onChangeService: setService,
-          billingCycle,
-          onChangeBillingCycle: setBillingCycle,
-          price,
-          onChangePrice: setPrice,
-          paymentDate,
-          onChangePaymentDate: setPaymentDate,
-          onChangeStep: setStep,
-        }}
-      >
-        <TopNavigation
-          leading={
-            <TopNavigationBackButton
-              aria-label="뒤로 가기"
-              onClick={handleBack}
-            />
-          }
-        />
-        {(() => {
-          switch (step) {
-            case "select_service":
-              return <SelectService />;
-            case "select_pay":
-              return <SelectPay />;
+    <SubscribeContext.Provider
+      value={{
+        category,
+        onChangeCategory: setCategory,
+        service,
+        onChangeService: setService,
+        billingCycle,
+        onChangeBillingCycle: setBillingCycle,
+        price,
+        onChangePrice: setPrice,
+        paymentDate,
+        onChangePaymentDate: setPaymentDate,
+        onChangeStep: setStep,
+      }}
+    >
+      <VStack className="flex-1" isScrollable>
+        <HStack paddingInline={2} paddingBlock={2} align="center">
+          <IconButton
+            label="뒤로 가기"
+            icon={<Icon icon="chevronLeft" />}
+            variant="ghost"
+            onClick={handleBack}
+          />
+        </HStack>
 
-            default:
-              return <></>;
-          }
-        })()}
-      </SubscribeContext.Provider>
-    </div>
+        {step === "select_service" && <SelectService />}
+        {step === "select_pay" && <SelectPay />}
+      </VStack>
+    </SubscribeContext.Provider>
   );
 }
 
