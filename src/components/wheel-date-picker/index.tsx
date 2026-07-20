@@ -81,7 +81,7 @@ function WheelDatePicker({
    * 바깥에서 value가 바뀌어도 다음에 열었을 때 예전 위치를 가리킨다.
    * 닫을 때는 key가 그대로라 언마운트되지 않고 닫힘 애니메이션이 살아있다.
    */
-  const [openSeq, setOpenSeq] = useState(0);
+  const [, setOpenSeq] = useState(0);
 
   function handleOpen() {
     // 렌더 중에 찾으면 첫 렌더엔 아직 DOM에 없을 수 있다. 여는 시점엔 확실히 있다.
