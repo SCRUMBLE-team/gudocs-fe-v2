@@ -2,10 +2,45 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import svgr from "vite-plugin-svgr";
+import { VitePWA } from "vite-plugin-pwa";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss(), svgr()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    svgr(),
+    VitePWA({
+      registerType: "autoUpdate",
+      injectRegister: "auto",
+      devOptions: {
+        enabled: true,
+      },
+      manifest: {
+        id: "/",
+        name: "gudocs",
+        short_name: "gudocs",
+        description: "구독관리 서비스",
+        theme_color: "#ffffff",
+        background_color: "#ffffff",
+        display: "standalone",
+        icons: [
+          {
+            src: "/pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "/pwa-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
+        ],
+      },
+    }),
+  ],
   resolve: {
     alias: {
       // lottie-react는 exports 필드가 없어 dev 사전 번들 시 CJS(UMD) 엔트리가
