@@ -5,6 +5,7 @@ import App from "./App.tsx";
 import QueryProvider from "./providers/query-provider.tsx";
 import { BrowserRouter } from "react-router-dom";
 import { Theme } from "@astryxdesign/core/theme";
+import { ToastViewport } from "@astryxdesign/core/Toast";
 import { gudocsTheme } from "./theme/gudocs";
 
 createRoot(document.getElementById("root")!).render(
@@ -12,7 +13,9 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <Theme theme={gudocsTheme} mode="light">
         <QueryProvider>
-          <App />
+          <ToastViewport position="topStart">
+            <App />
+          </ToastViewport>
         </QueryProvider>
       </Theme>
     </BrowserRouter>

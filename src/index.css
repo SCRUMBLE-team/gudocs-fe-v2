@@ -38,3 +38,15 @@
     background-color: #9ca3af;
   }
 }
+
+/* Astryx Toast 뷰포트는 코너 4곳(top/bottom × start/end)만 지원한다.
+   상단 중앙에 띄우기 위해 뷰포트의 가로 위치를 강제로 덮어쓴다.
+   뷰포트는 position: fixed(창 기준)지만 앱이 mx-auto로 가운데 정렬돼 있어
+   시각적으로 앱 상단 중앙과 일치한다. 레이어/특이도와 무관하게 이기도록
+   비레이어 규칙 + !important 로 둔다. */
+[role="region"][aria-label="Notifications"] {
+  inset-inline: auto !important;
+  left: 50% !important;
+  transform: translateX(-50%);
+  align-items: center !important;
+}

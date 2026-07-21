@@ -29,4 +29,5 @@ export interface SubscriptionDetail extends CreateSubscribePayload {
   status: SubscribeStatus;
   createdAt: string;
   updatedAt: string;
+  serviceName: string;
 }
