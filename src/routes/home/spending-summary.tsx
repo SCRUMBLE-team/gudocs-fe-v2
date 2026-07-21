@@ -1,21 +1,56 @@
 import { Card } from "@astryxdesign/core/Card";
 import { VStack } from "@astryxdesign/core/VStack";
-import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
 import { Button } from "@astryxdesign/core/Button";
+import { ResponsiveContainer, BarChart, Bar, XAxis, LabelList } from "recharts";
+import { useMonthlyExpenseQuery } from "../../hooks/query/useMonthlyExpenseQuery";
+import { useExpensesTrendsQuery } from "../../hooks/query/useExpensesTrendsQuery";
+import { getBaseYearMonth } from "../../utils/date";
+import { formatWon } from "../../utils/format";
 
-const MONTHLY_SPENDING = [
-  { label: "1월", amount: 6 },
-  { label: "2월", amount: 5 },
-  { label: "3월", amount: 4 },
-  { label: "4월", amount: 3 },
-  { label: "5월", amount: 2 },
-  { label: "6월", amount: 1 },
-];
+// 전월 대비 문구. 덜 썼으면 금액을 파란색(accent), 더 썼으면 빨간색(text-red) 토큰으로 강조한다.
+function ChangeText({ changeAmount }: { changeAmount: number }) {
+  if (changeAmount === 0) {
+    return <Text type="supporting">지난달과 동일하게 쓰는 중</Text>;
+  }
 
-const MAX_AMOUNT = 10;
+  const spentLess = changeAmount < 0;
+  const amountColor = spentLess
+    ? "text-[var(--color-accent)]"
+    : "text-[var(--color-text-red)]";
+
+  return (
+    <Text type="supporting">
+      지난달 대비{" "}
+      <Text
+        type="supporting"
+        weight="bold"
+        color="inherit"
+        className={amountColor}
+      >
+        {formatWon(Math.abs(changeAmount))}
+      </Text>{" "}
+      {spentLess ? "덜" : "더"} 쓰는 중
+    </Text>
+  );
+}
 
 function SpendingSummary() {
+  const baseParams = getBaseYearMonth();
+  const { data: monthly } = useMonthlyExpenseQuery(baseParams);
+  const { data: trends } = useExpensesTrendsQuery(baseParams);
+
+  // 색은 gudocs 테마 토큰(CSS 변수)을 각 항목의 fill로 넘긴다.
+  // 현재 달만 accent 원색, 나머지는 accent-muted로 대비를 준다.
+  const chartData = trends.monthlyTrends.map(({ year, month, totalAmount }) => {
+    const isCurrent = year === baseParams.year && month === baseParams.month;
+    return {
+      label: `${month}월`,
+      amount: totalAmount,
+      fill: isCurrent ? "var(--color-accent)" : "var(--color-accent-muted)",
+    };
+  });
+
   return (
     <Card className="border-gray-300">
       <VStack gap={3}>
@@ -23,33 +58,31 @@ function SpendingSummary() {
           <Text type="large" weight="bold">
             이번달 구독료 확인
           </Text>
-          <Text type="supporting">지난달 대비 22만원 덜 쓰는 중</Text>
+          <ChangeText changeAmount={monthly.changeAmount} />
         </VStack>
 
-        {/* Astryx에는 차트 컴포넌트가 없어 프리미티브로 구성한 임시 막대 표현.
-            각 열은 stretch로 높이를 확정받아야 막대의 백분율 높이가 계산된다. */}
-        <HStack gap={2} height={140} align="stretch">
-          {MONTHLY_SPENDING.map(({ label, amount }) => (
-            <VStack
-              key={label}
-              gap={1}
-              align="center"
-              justify="end"
-              className="flex-1"
-            >
-              <Text type="supporting" size="2xs">
-                {amount}
-              </Text>
-              <VStack
-                className="w-full shrink-0 rounded-t-sm bg-accent"
-                height={`${(amount / MAX_AMOUNT) * 100}%`}
+        <ResponsiveContainer width="100%" height={160}>
+          <BarChart data={chartData} margin={{ top: 20 }}>
+            <XAxis
+              dataKey="label"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11, fill: "var(--color-text-secondary)" }}
+            />
+            <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
+              <LabelList
+                dataKey="amount"
+                position="top"
+                formatter={(value) => formatWon(Number(value))}
+                style={{
+                  fontSize: 11,
+                  fontWeight: "bold",
+                  fill: "var(--color-text-secondary)",
+                }}
               />
-              <Text type="supporting" size="2xs">
-                {label}
-              </Text>
-            </VStack>
-          ))}
-        </HStack>
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
 
         <Button
           label="지출 금액 자세히 보러가기"
