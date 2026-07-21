@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { VStack } from "@astryxdesign/core/VStack";
 import { Heading } from "@astryxdesign/core/Heading";
+import { useToast } from "@astryxdesign/core/Toast";
 import FixedBottomCTA from "../../../../components/fixed-bottom-cta";
+import { useCreateSubscriptionMutation } from "../../../../hooks/query/useCreateSubscriptionMutation";
 import { useSubscribeContext } from "../subscribe-context";
 import { toSubscribePayload } from "../to-subscribe-payload";
 import BillingCycleField from "./billing-cycle-field";
@@ -12,6 +14,8 @@ function SelectPay() {
   const context = useSubscribeContext("SelectPay");
   const { service, price, billingCycle, paymentDate } = context;
   const navigate = useNavigate();
+  const showToast = useToast();
+  const { mutate, isPending } = useCreateSubscriptionMutation();
 
   const title = (() => {
     if (!price) return `${service} 이용요금을\n알려주세요`;
@@ -23,13 +27,24 @@ function SelectPay() {
   const payload = toSubscribePayload(context);
 
   function handleSubmit() {
-    if (payload == null) {
+    if (payload == null || isPending) {
       return;
     }
 
-    // TODO: 구독 등록 API가 생기면 연동한다.
-    console.log(payload);
-    navigate("/");
+    mutate(payload, {
+      onSuccess: () => {
+        showToast({ body: "구독이 등록되었어요" });
+        navigate("/");
+      },
+      onError: () => {
+        showToast({
+          body: "등록에 실패했어요. 잠시 후 다시 시도해주세요.",
+          type: "error",
+          isAutoHide: true,
+          autoHideDuration: 3000,
+        });
+      },
+    });
   }
 
   return (
@@ -46,7 +61,13 @@ function SelectPay() {
         </VStack>
       </VStack>
 
-      {payload && <FixedBottomCTA label="등록하기" onClick={handleSubmit} />}
+      {payload && (
+        <FixedBottomCTA
+          label="등록하기"
+          onClick={handleSubmit}
+          isDisabled={isPending}
+        />
+      )}
     </VStack>
   );
 }
