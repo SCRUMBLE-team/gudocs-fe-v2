@@ -33,9 +33,16 @@ function ServiceField() {
     );
   }
 
-  const options = CATEGORY_SERVICES[category].map((name) => ({
-    value: name,
-    label: name,
+  const options = CATEGORY_SERVICES[category].map((s) => ({
+    value: s.name,
+    label: s.name,
+    icon: (
+      <img
+        src={s.logo}
+        alt=""
+        className="h-6 w-6 shrink-0 rounded object-contain"
+      />
+    ),
   }));
 
   return (
