@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { VStack } from "@astryxdesign/core/VStack";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
@@ -6,14 +7,15 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { IconButton } from "@astryxdesign/core/IconButton";
 import { TabBar } from "../../components/tab-bar";
 import { TABS } from "../../constants/menus";
-// import SpendingSummary from "./spending-summary";
-import EmptySubscription from "./empty-subscription";
+import Fab from "../../components/fab";
+import SpendingSummary from "./spending-summary";
 import { AlarmIcon } from "./tab-icons";
-import { useSubscriptionsQuery } from "../../hooks/query/useSubscriptionsQuery";
+import SubscriptionCard from "./subscription-card";
+import AnalyzeExpenses from "./analyze-expenses";
 
 function HomePage() {
   const [tab, setTab] = useState("home");
-  useSubscriptionsQuery({});
+  const navigate = useNavigate();
 
   return (
     <>
@@ -35,10 +37,19 @@ function HomePage() {
         </HStack>
 
         <VStack padding={4} gap={3}>
-          <EmptySubscription />
-          {/* <SpendingSummary /> */}
+          <Suspense>
+            <SubscriptionCard />
+          </Suspense>
+          <Suspense>
+            <SpendingSummary />
+          </Suspense>
+          <Suspense>
+            <AnalyzeExpenses />
+          </Suspense>
         </VStack>
       </VStack>
+
+      <Fab onClick={() => navigate("/subscribe/new")} />
 
       <TabBar value={tab} onChange={setTab}>
         {TABS.map(({ value, label, icon }) => (
