@@ -9,9 +9,9 @@ import { TabBarContext } from "./tab-bar-context";
  */
 export type TabBarProps = {
   /** 현재 선택된 TabBar.Item의 value */
-  value: string;
+  value?: string;
   /** 선택된 탭이 바뀔 때 호출돼요 */
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   /** 2개 이상 5개 이하의 TabBar.Item을 전달해주세요 */
   children: ReactNode;
 };

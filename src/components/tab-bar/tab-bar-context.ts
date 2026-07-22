@@ -1,8 +1,8 @@
 import { createContext, useContext } from "react";
 
 export type TabBarContextValue = {
-  value: string;
-  onChange: (value: string) => void;
+  value?: string;
+  onChange?: (value: string) => void;
 };
 
 export const TabBarContext = createContext<TabBarContextValue | null>(null);
