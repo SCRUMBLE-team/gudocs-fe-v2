@@ -1,12 +1,22 @@
-import { Avatar, Badge, Card, Icon, List, ListItem } from "@astryxdesign/core";
+import {
+  Avatar,
+  Badge,
+  Card,
+  Icon,
+  IconButton,
+  List,
+  ListItem,
+} from "@astryxdesign/core";
 import { useSubscriptionsQuery } from "../../hooks/query/useSubscriptionsQuery";
 import EmptySubscription from "./empty-subscription";
 import { Text } from "@astryxdesign/core/Text";
 import { getServiceLogo } from "../../constants/category";
 import { formatWon } from "../../utils/format";
 import { daysSince } from "../../utils/date";
+import { useNavigate } from "react-router-dom";
 
 function SubscriptionCard() {
+  const navigate = useNavigate();
   const { data } = useSubscriptionsQuery({});
 
   const subscribeList = [...data].splice(0, 3);
@@ -20,7 +30,13 @@ function SubscriptionCard() {
           <Text type="large" weight="bold">
             최근에 등록하신 서비스에요
           </Text>
-          <Icon icon="chevronRight" size="sm" color="tertiary" />
+          <IconButton
+            label="구독 전체 보기"
+            icon={<Icon icon="chevronRight" size="sm" color="tertiary" />}
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/subscribe")}
+          />
         </div>
         <List className="mt-3" density="spacious">
           {subscribeList.map((item) => {
@@ -28,6 +44,7 @@ function SubscriptionCard() {
               getServiceLogo(item.serviceName) ?? getServiceLogo(item.service);
             return (
               <ListItem
+                onClick={() => navigate(`/subscribe/${item.id}`)}
                 startContent={
                   serviceLogo ? (
                     <img

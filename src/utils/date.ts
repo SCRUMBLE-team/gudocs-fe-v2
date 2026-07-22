@@ -7,6 +7,12 @@ export function getBaseYearMonth() {
   };
 }
 
+/** "YYYY-MM-DD" ISO 문자열에서 연·월을 뽑는다. 캘린더가 보고 있는 월을 쿼리 인자로 넘길 때 쓴다. */
+export function toYearMonth(iso: string) {
+  const [year, month] = iso.split("-");
+  return { year: Number(year), month: Number(month) };
+}
+
 /** ISO 날짜 문자열로부터 오늘까지 지난 일수(0 이상). 등록 경과일(D+N) 표시에 쓴다. */
 export function daysSince(isoDate: string): number {
   const then = new Date(isoDate).getTime();

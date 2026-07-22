@@ -1,6 +1,7 @@
 import type { ApiResponse } from "../types/api";
 import type {
   CategoryExpenseData,
+  MonthlyDetailData,
   MonthlyExpense,
   TrendData,
 } from "../types/expenses";
@@ -71,7 +72,7 @@ export async function getMonthlyExpenseDetails({
   if (year) params.set("year", String(year));
   if (month) params.set("month", String(month));
 
-  const response = await http.get<ApiResponse<TrendData>>(
+  const response = await http.get<ApiResponse<MonthlyDetailData>>(
     `/api/subscriptions/expenses/monthly/details?${params}`,
   );
 

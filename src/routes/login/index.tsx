@@ -27,7 +27,7 @@ const SOCIAL_LOGIN_PROVIDERS = [
     name: "google",
     label: "Google로 시작하기",
     logo: googleLogo,
-    className: "bg-white text-[#1F1F1F] border border-default",
+    className: "bg-white text-[#1F1F1F] border border-gray-400",
   },
 ] as const;
 
@@ -39,7 +39,13 @@ function LoginPage() {
   };
 
   return (
-    <VStack className="flex-1" justify="center" align="center" gap={3} padding={4}>
+    <VStack
+      className="flex-1"
+      justify="center"
+      align="center"
+      gap={3}
+      padding={4}
+    >
       <VStack align="center">
         <Lottie
           animationData={documentLottie}
