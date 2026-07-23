@@ -1,23 +1,13 @@
 import { Button, Card, VStack, HStack, Text } from "@astryxdesign/core";
 import { ResponsiveContainer, PieChart, Pie, Tooltip } from "recharts";
+import { useNavigate } from "react-router-dom";
 import { CATEGORY_META } from "../../constants/category";
+import { PIE_PALETTE } from "../../constants/category-palette";
 import { useCategoryExpensesQuery } from "../../hooks/query/useCategoryExpensesQuery";
 import { getBaseYearMonth } from "../../utils/date";
 import { formatWon } from "../../utils/format";
 
 // 카테고리 별 소비 분석 — 지출 비중을 Recharts 도넛 차트로 보여준다.
-
-// 카테고리 팔레트. 테마의 쨍한 아이콘 원색 대신, 조화롭고 CVD/대비 검증을 통과한
-// 카테고리 색을 쓴다. light-dark()로 라이트/다크 모드의 각 스텝을 자동 선택한다.
-// (adjacent CVD ΔE 9.1 light / 8.4 dark, normal-vision 19.6 / 19.3 통과)
-const PIE_PALETTE = [
-  "light-dark(#2a78d6, #3987e5)", // blue
-  "light-dark(#eb6834, #d95926)", // orange
-  "light-dark(#1baf7a, #199e70)", // aqua
-  "light-dark(#eda100, #c98500)", // yellow
-  "light-dark(#e87ba4, #d55181)", // magenta
-  "light-dark(#008300, #008300)", // green
-];
 
 const TOP_COUNT = 5;
 
@@ -30,6 +20,7 @@ type Slice = {
 };
 
 function AnalyzeExpenses() {
+  const navigate = useNavigate();
   const { data } = useCategoryExpensesQuery(getBaseYearMonth());
 
   // 금액 내림차순 정렬 후 상위 N개 + 나머지는 "기타"로 합산해 조각이 잘게 쪼개지지 않게 한다.
@@ -111,7 +102,12 @@ function AnalyzeExpenses() {
           ))}
         </VStack>
 
-        <Button label="소비 분석 살펴보기" variant="primary" className="p-6" />
+        <Button
+          label="소비 분석 살펴보기"
+          variant="primary"
+          className="p-6"
+          onClick={() => navigate("/analyze")}
+        />
       </VStack>
     </Card>
   );
