@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Badge,
   List,
   ListItem,
@@ -10,7 +9,8 @@ import {
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSubscriptionsQuery } from "../../hooks/query/useSubscriptionsQuery";
-import { CATEGORY_META, getServiceLogo } from "../../constants/category";
+import ServiceLogo from "../../components/service-logo";
+import { CATEGORY_META } from "../../constants/category";
 import { BILLING_CYCLE_META } from "../../constants/paymet";
 import { formatWon } from "../../utils/format";
 import { billingText } from "../../utils/subscribe";
@@ -58,9 +58,6 @@ function ListView() {
             </HStack>
             <List>
               {items.map((item) => {
-                const serviceLogo =
-                  getServiceLogo(item.serviceName) ??
-                  getServiceLogo(item.service);
                 const isPaused = item.status === "PAUSED";
                 return (
                   <ListItem
@@ -68,15 +65,10 @@ function ListView() {
                     className={isPaused ? "opacity-50" : undefined}
                     onClick={() => navigate(`/subscribe/${item.id}`)}
                     startContent={
-                      serviceLogo ? (
-                        <img
-                          src={serviceLogo}
-                          alt=""
-                          className="h-9 w-9 shrink-0 rounded-lg object-contain"
-                        />
-                      ) : (
-                        <Avatar name={item.serviceName} size="small" />
-                      )
+                      <ServiceLogo
+                        name={item.serviceName}
+                        fallbackName={item.service}
+                      />
                     }
                     label={
                       <HStack gap={1} align="center">

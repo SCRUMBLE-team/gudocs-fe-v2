@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Button,
   Icon,
   IconButton,
@@ -12,10 +11,11 @@ import { useState, type ReactNode, type SVGProps } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@astryxdesign/core/Toast";
 import BottomSheet from "../../../components/bottom-sheet";
+import ServiceLogo from "../../../components/service-logo";
 import { useSubscriptionQuery } from "../../../hooks/query/useSubscriptionQuery";
 import { useChangeSubscribeStatusMutation } from "../../../hooks/query/useChangeSubscribeStatusMutation";
 import { useDeleteSubscriptionMutation } from "../../../hooks/query/useDeleteSubscriptionMutation";
-import { CATEGORY_META, getServiceLogo } from "../../../constants/category";
+import { CATEGORY_META } from "../../../constants/category";
 import { BILLING_CYCLE_META } from "../../../constants/paymet";
 import { formatWon } from "../../../utils/format";
 import { billingText } from "../../../utils/subscribe";
@@ -96,8 +96,6 @@ function SubscriptionDetailContent({ id }: { id: string }) {
 
   const isPaused = data.status === "PAUSED";
   const meta = CATEGORY_META[data.category];
-  const serviceLogo =
-    getServiceLogo(data.serviceName) ?? getServiceLogo(data.service);
   const goEdit = () => navigate(`/subscribe/${id}/edit`);
 
   async function handleToggleActive(isActive: boolean) {
@@ -141,15 +139,11 @@ function SubscriptionDetailContent({ id }: { id: string }) {
     <VStack className="flex-1">
       <VStack paddingInline={5} paddingBlock={4} gap={2}>
         <HStack gap={2} align="center">
-          {serviceLogo ? (
-            <img
-              src={serviceLogo}
-              alt=""
-              className="h-7 w-7 rounded-lg object-contain"
-            />
-          ) : (
-            <Avatar name={data.serviceName} size="xsmall" />
-          )}
+          <ServiceLogo
+            name={data.serviceName}
+            fallbackName={data.service}
+            size={28}
+          />
           <Text type="body" weight="semibold" color="secondary">
             {data.serviceName}
           </Text>

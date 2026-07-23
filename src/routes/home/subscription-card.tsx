@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Badge,
   Card,
   Icon,
@@ -10,7 +9,7 @@ import {
 import { useSubscriptionsQuery } from "../../hooks/query/useSubscriptionsQuery";
 import EmptySubscription from "./empty-subscription";
 import { Text } from "@astryxdesign/core/Text";
-import { getServiceLogo } from "../../constants/category";
+import ServiceLogo from "../../components/service-logo";
 import { formatWon } from "../../utils/format";
 import { daysSince } from "../../utils/date";
 import { useNavigate } from "react-router-dom";
@@ -40,21 +39,14 @@ function SubscriptionCard() {
         </div>
         <List className="mt-3" density="spacious">
           {subscribeList.map((item) => {
-            const serviceLogo =
-              getServiceLogo(item.serviceName) ?? getServiceLogo(item.service);
             return (
               <ListItem
                 onClick={() => navigate(`/subscribe/${item.id}`)}
                 startContent={
-                  serviceLogo ? (
-                    <img
-                      src={serviceLogo}
-                      alt=""
-                      className="h-9 w-9 shrink-0 rounded-lg object-contain"
-                    />
-                  ) : (
-                    <Avatar name={item.serviceName} size="small" />
-                  )
+                  <ServiceLogo
+                    name={item.serviceName}
+                    fallbackName={item.service}
+                  />
                 }
                 className="p-0 py-1"
                 key={item.id}

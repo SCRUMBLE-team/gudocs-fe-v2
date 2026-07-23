@@ -1,14 +1,7 @@
-import {
-  Avatar,
-  List,
-  ListItem,
-  VStack,
-  HStack,
-  Text,
-} from "@astryxdesign/core";
+import { List, ListItem, VStack, HStack, Text } from "@astryxdesign/core";
 import { useMemo } from "react";
 import type { MonthlyDetailData } from "../../types/expenses";
-import { getServiceLogo } from "../../constants/category";
+import ServiceLogo from "../../components/service-logo";
 import { formatWon } from "../../utils/format";
 import { useNavigate } from "react-router-dom";
 
@@ -61,23 +54,12 @@ function MonthlyExpensePanel({ subscriptions, month }: Props) {
           </HStack>
           <List>
             {items?.map((item) => {
-              const serviceLogo = getServiceLogo(item.serviceName);
               return (
                 <ListItem
                   onClick={() => {
                     navigate(`/subscribe/${item.subscriptionId}`);
                   }}
-                  startContent={
-                    serviceLogo ? (
-                      <img
-                        src={serviceLogo}
-                        alt=""
-                        className="h-9 w-9 shrink-0 rounded-lg object-contain"
-                      />
-                    ) : (
-                      <Avatar name={item.serviceName} size="small" />
-                    )
-                  }
+                  startContent={<ServiceLogo name={item.serviceName} />}
                   key={item.subscriptionId}
                   label={
                     <Text type="body" weight="semibold">
