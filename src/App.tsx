@@ -8,6 +8,7 @@ import SubscribePage from "./routes/subscribe";
 import Layout from "./routes/layout";
 import SubscribeDetailPage from "./routes/subscribe/[id]";
 import SubscribeEditPage from "./routes/subscribe/[id]/edit";
+import AnalyzePage from "./routes/analyze";
 
 function App() {
   return (
@@ -22,11 +23,12 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="/subscribe" element={<SubscribePage />} />
         </Route>
+        <Route path="/analyze" element={<AnalyzePage />} />
         <Route path="/subscribe/:id/edit" element={<SubscribeEditPage />} />
         <Route path="/subscribe/:id" element={<SubscribeDetailPage />} />
+        <Route path="/subscribe/new" element={<SubscribeNewPage />} />
         <Route path="/login" element={<LoginPage />} />\
         <Route path="/landing" element={<LandingPage />} />
-        <Route path="/subscribe/new" element={<SubscribeNewPage />} />
       </Routes>
     </VStack>
   );
