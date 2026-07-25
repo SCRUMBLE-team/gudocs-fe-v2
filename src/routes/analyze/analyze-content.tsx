@@ -2,6 +2,7 @@ import { List, ListItem } from "@astryxdesign/core";
 import { VStack } from "@astryxdesign/core/VStack";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
+import EmptyState from "../../components/empty-state";
 import ServiceLogo from "../../components/service-logo";
 import { CATEGORY_META } from "../../constants/category";
 import { PIE_PALETTE, REST_COLOR } from "../../constants/category-palette";
@@ -21,10 +22,6 @@ type Segment = {
   fill: string;
 };
 
-/**
- * 카테고리를 금액 내림차순으로 정렬해 상위 N개 + 나머지를 "그 외 M개"로 합산한다.
- * 조각이 잘게 쪼개지지 않게 하고, 홈 소비 분석 카드와 동일한 규칙을 따른다.
- */
 function buildSegments(
   categories: CategoryExpenseData["categories"],
 ): Segment[] {
@@ -71,10 +68,8 @@ function AnalyzeContent({ year, month }: { year: number; month: number }) {
   // 지출 내역이 없는 달
   if (segments.length === 0) {
     return (
-      <VStack padding={4} paddingBlock={8} align="center">
-        <Text type="body" color="secondary">
-          이 달은 지출 내역이 없어요
-        </Text>
+      <VStack padding={4} paddingBlock={8}>
+        <EmptyState message={"이 달은\n지출 내역이 없어요"} />
       </VStack>
     );
   }

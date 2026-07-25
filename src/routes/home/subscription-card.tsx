@@ -20,7 +20,7 @@ function SubscriptionCard() {
 
   const subscribeList = [...data].splice(0, 3);
 
-  if (!data) return <EmptySubscription />;
+  if (data.length === 0) return <EmptySubscription />;
 
   return (
     <div>
@@ -45,7 +45,7 @@ function SubscriptionCard() {
                 startContent={
                   <ServiceLogo
                     name={item.serviceName}
-                    fallbackName={item.service}
+                    fallbackName={item.serviceName}
                   />
                 }
                 className="p-0 py-1"

@@ -13,21 +13,32 @@ export type BillingCycle = "MONTHLY" | "YEARLY";
 export type PaymentMethod = "CARD" | "BANK_TRANSFER" | "SIMPLE_PAY" | "ETC";
 export type SubscribeStatus = "ACTIVE" | "PAUSED";
 
-/** 구독 등록 요청 본문 */
+/** 구독 등록·수정 요청 본문 */
 export type CreateSubscribePayload = {
   category: SubscribeCategory;
-  service: string;
+  serviceName: string;
   price: number;
   billingCycle: BillingCycle;
-  billingDay: number;
-  billingMonth: number | null;
+  /** 최근(최초) 결제일. "YYYY-MM-DD" — ex) "2026-07-15" */
+  firstBillingDate: string;
 };
 
-// 서버 응답 — 서버 할당 필드 포함
-export interface SubscriptionDetail extends CreateSubscribePayload {
+/**
+ * 서버 응답. 요청 본문에 없는 서버 파생 필드(id·status·paymentMethod·nextBillingDate 등)가
+ * 붙으므로 CreateSubscribePayload를 상속하지 않고 따로 선언한다.
+ */
+export interface SubscriptionDetail {
   id: number;
+  serviceName: string;
+  category: SubscribeCategory;
+  price: number;
+  billingCycle: BillingCycle;
+  /** "YYYY-MM-DD" */
+  firstBillingDate: string;
+  paymentMethod: PaymentMethod;
   status: SubscribeStatus;
+  /** 서버가 계산한 다음 결제 예정일. "YYYY-MM-DD" */
+  nextBillingDate: string;
   createdAt: string;
   updatedAt: string;
-  serviceName: string;
 }

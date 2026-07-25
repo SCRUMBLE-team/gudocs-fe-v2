@@ -6,24 +6,8 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
 import { Icon } from "@astryxdesign/core/Icon";
 import BottomSheet from "../../../../components/bottom-sheet";
+import { fromISODate, toISODate } from "../../../../utils/date";
 import { useSubscribeContext } from "../subscribe-context";
-
-/**
- * Date -> YYYY-MM-DD.
- * toISOString()은 UTC로 변환하므로 한국 시간 자정 근처에서 날짜가 하루
- * 밀린다. 로컬 기준 연·월·일을 그대로 조합한다.
- */
-function toISODate(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}` as ISODateString;
-}
-
-function fromISODate(value: string) {
-  const [year, month, day] = value.split("-").map(Number);
-  return new Date(year, month - 1, day);
-}
 
 function formatKorean(date: Date) {
   return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
@@ -76,8 +60,12 @@ function BillingDateField() {
         <VStack align="center" paddingBlock={2}>
           <Calendar
             mode="single"
-            value={paymentDate ? toISODate(paymentDate) : undefined}
-            max={toISODate(new Date())}
+            value={
+              paymentDate
+                ? (toISODate(paymentDate) as ISODateString)
+                : undefined
+            }
+            max={toISODate(new Date()) as ISODateString}
             onChange={(value) => {
               onChangePaymentDate(
                 typeof value === "string" ? fromISODate(value) : null,
