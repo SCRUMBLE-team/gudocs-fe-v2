@@ -16,7 +16,7 @@ import BillingCycleField from "../../new/funnel/billing-cycle-field";
 import BillingDateField from "../../new/funnel/billing-date-field";
 import { useSubscriptionQuery } from "../../../../hooks/query/useSubscriptionQuery";
 import { useEditSubscriptionMutation } from "../../../../hooks/query/useEditSubscriptionMutation";
-import { toPaymentDate } from "../../../../utils/subscribe";
+import { fromISODate } from "../../../../utils/date";
 
 function EditForm({ id }: { id: string }) {
   const navigate = useNavigate();
@@ -25,16 +25,14 @@ function EditForm({ id }: { id: string }) {
   const { mutate, isPending } = useEditSubscriptionMutation();
 
   // 기존 값으로 시드. 퍼널 필드들은 SubscribeContext에 바인딩돼 있어 그대로 재사용한다.
-  // ServiceField 옵션은 서비스 '이름'을 value로 쓴다. 실제 이름이 담긴 serviceName을
-  // 우선 시드해야 SheetSelectField가 옵션과 매칭돼 기본값이 채워진다. (service는 보조)
+  // ServiceField 옵션은 서비스 '이름'을 value로 쓰므로 serviceName을 그대로 시드하면
+  // SheetSelectField가 옵션과 매칭돼 기본값이 채워진다.
   const [category, setCategory] = useState(data.category);
-  const [service, setService] = useState<string | null>(
-    data.serviceName ?? data.service,
-  );
+  const [service, setService] = useState<string | null>(data.serviceName);
   const [billingCycle, setBillingCycle] = useState(data.billingCycle);
   const [price, setPrice] = useState<number | null>(data.price);
   const [paymentDate, setPaymentDate] = useState<Date | null>(
-    toPaymentDate(data),
+    fromISODate(data.firstBillingDate),
   );
 
   const contextValue: SubscribeContextValue = {

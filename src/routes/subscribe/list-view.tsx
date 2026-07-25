@@ -67,7 +67,7 @@ function ListView() {
                     startContent={
                       <ServiceLogo
                         name={item.serviceName}
-                        fallbackName={item.service}
+                        fallbackName={item.serviceName}
                       />
                     }
                     label={
@@ -75,7 +75,9 @@ function ListView() {
                         <Text type="body" weight="semibold">
                           {item.serviceName}
                         </Text>
-                        {isPaused && <Badge variant="neutral" label="일시정지" />}
+                        {isPaused && (
+                          <Badge variant="neutral" label="일시정지" />
+                        )}
                       </HStack>
                     }
                     description={
