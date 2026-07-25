@@ -7,6 +7,8 @@ import { useMonthlyExpenseQuery } from "../../hooks/query/useMonthlyExpenseQuery
 import { useExpensesTrendsQuery } from "../../hooks/query/useExpensesTrendsQuery";
 import { getBaseYearMonth } from "../../utils/date";
 import { formatWon } from "../../utils/format";
+import CardEmptyMessage from "./card-empty-message";
+import barchartLottie from "../../assets/lottie/bar_chart.json";
 
 // 전월 대비 문구. 덜 썼으면 금액을 파란색(accent), 더 썼으면 빨간색(text-red) 토큰으로 강조한다.
 function ChangeText({ changeAmount }: { changeAmount: number }) {
@@ -40,6 +42,11 @@ function SpendingSummary() {
   const { data: monthly } = useMonthlyExpenseQuery(baseParams);
   const { data: trends } = useExpensesTrendsQuery(baseParams);
 
+  // 어느 달에도 지출이 없으면 0짜리 막대만 늘어서므로 차트를 그리지 않는다.
+  const hasSpending = trends.monthlyTrends.some(
+    ({ totalAmount }) => totalAmount > 0,
+  );
+
   // 색은 gudocs 테마 토큰(CSS 변수)을 각 항목의 fill로 넘긴다.
   // 현재 달만 accent 원색, 나머지는 accent-muted로 대비를 준다.
   const chartData = trends.monthlyTrends.map(({ year, month, totalAmount }) => {
@@ -58,37 +65,46 @@ function SpendingSummary() {
           <Text type="large" weight="bold">
             이번달 구독료 확인
           </Text>
-          <ChangeText changeAmount={monthly.changeAmount} />
+          {hasSpending && <ChangeText changeAmount={monthly.changeAmount} />}
         </VStack>
 
-        <ResponsiveContainer width="100%" height={160}>
-          <BarChart data={chartData} margin={{ top: 20 }}>
-            <XAxis
-              dataKey="label"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 11, fill: "var(--color-text-secondary)" }}
-            />
-            <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
-              <LabelList
-                dataKey="amount"
-                position="top"
-                formatter={(value) => formatWon(Number(value))}
-                style={{
-                  fontSize: 11,
-                  fontWeight: "bold",
-                  fill: "var(--color-text-secondary)",
-                }}
-              />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        {hasSpending ? (
+          <>
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={chartData} margin={{ top: 20 }}>
+                <XAxis
+                  dataKey="label"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: "var(--color-text-secondary)" }}
+                />
+                <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
+                  <LabelList
+                    dataKey="amount"
+                    position="top"
+                    formatter={(value) => formatWon(Number(value))}
+                    style={{
+                      fontSize: 11,
+                      fontWeight: "bold",
+                      fill: "var(--color-text-secondary)",
+                    }}
+                  />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
 
-        <Button
-          label="지출 금액 자세히 보러가기"
-          variant="primary"
-          className="p-6"
-        />
+            <Button
+              label="지출 금액 자세히 보러가기"
+              variant="primary"
+              className="p-6"
+            />
+          </>
+        ) : (
+          <CardEmptyMessage
+            animationData={barchartLottie}
+            message={"구독을 등록하면\n월별 지출 추이를 보여드려요"}
+          />
+        )}
       </VStack>
     </Card>
   );
