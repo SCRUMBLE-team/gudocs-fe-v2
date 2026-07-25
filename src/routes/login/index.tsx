@@ -1,8 +1,8 @@
 import Lottie from "lottie-react";
-import { useNavigate } from "react-router-dom";
 import { VStack } from "@astryxdesign/core/VStack";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
+import { API_BASE_URL } from "../../api/httpClient";
 import documentLottie from "../../assets/lottie/document.json";
 import kakaoLogo from "../../assets/logo/kakao.png";
 import naverLogo from "../../assets/logo/naver.png";
@@ -31,12 +31,12 @@ const SOCIAL_LOGIN_PROVIDERS = [
   },
 ] as const;
 
-function LoginPage() {
-  const navigate = useNavigate();
+type SocialProvider = (typeof SOCIAL_LOGIN_PROVIDERS)[number]["name"];
 
-  const handleSocialLogin = () => {
-    navigate("/");
-  };
+function LoginPage() {
+  function handleSocialLogin(provider: SocialProvider) {
+    window.location.assign(`${API_BASE_URL}/oauth2/authorization/${provider}`);
+  }
 
   return (
     <VStack
@@ -67,7 +67,7 @@ function LoginPage() {
           <HStack
             as="button"
             key={name}
-            onClick={handleSocialLogin}
+            onClick={() => handleSocialLogin(name)}
             gap={3}
             justify="center"
             align="center"

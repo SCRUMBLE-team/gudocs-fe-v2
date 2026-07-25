@@ -6,13 +6,37 @@ interface HttpOptions {
   body?: unknown; // JS 객체 or FormData 등
 }
 
+/** 응답이 실패했을 때 baseFetch가 던지는 값. Error 인스턴스가 아니다. */
+export interface HttpError {
+  status: number;
+  body: unknown;
+  message: string;
+}
+
+/**
+ * catch/onError로 넘어온 값이 HTTP 실패인지 판별한다.
+ * 던지는 값이 Error가 아니라서 호출부에서 타입 단언을 쓰게 되는 걸 막는다.
+ */
+export function isHttpError(error: unknown): error is HttpError {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    typeof (error as HttpError).status === "number"
+  );
+}
+
 // 끝 슬래시 제거 — path의 앞 슬래시와 겹치지 않도록
-const BASE_URL = (import.meta.env.VITE_BASE_URL ?? "").replace(/\/+$/, "");
+// OAuth authorize URL처럼 http 래퍼를 거치지 않는 전체 페이지 이동에서도
+// 같은 오리진을 써야 해서 공개한다.
+export const API_BASE_URL = (import.meta.env.VITE_BASE_URL ?? "").replace(
+  /\/+$/,
+  "",
+);
 
 function resolveUrl(path: string) {
   // 절대 URL이면 그대로 사용
   if (/^https?:\/\//.test(path)) return path;
-  return `${BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  return `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 async function baseFetch<T>(
@@ -58,11 +82,13 @@ async function baseFetch<T>(
       errorBody = null;
     }
 
-    throw {
+    const error: HttpError = {
       status: res.status,
       body: errorBody,
       message: "HTTP Error",
     };
+
+    throw error;
   }
 
   // 204 등 body 없는 경우
