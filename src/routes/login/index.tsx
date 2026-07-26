@@ -35,7 +35,9 @@ type SocialProvider = (typeof SOCIAL_LOGIN_PROVIDERS)[number]["name"];
 
 function LoginPage() {
   function handleSocialLogin(provider: SocialProvider) {
-    window.location.assign(`${API_BASE_URL}/oauth2/authorization/${provider}`);
+    window.location.assign(
+      `https://3-35-49-217.sslip.io/oauth2/authorization/${provider}`,
+    );
   }
 
   return (
