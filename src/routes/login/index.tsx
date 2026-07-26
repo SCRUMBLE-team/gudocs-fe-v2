@@ -2,7 +2,6 @@ import Lottie from "lottie-react";
 import { VStack } from "@astryxdesign/core/VStack";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
-import { API_BASE_URL } from "../../api/httpClient";
 import documentLottie from "../../assets/lottie/document.json";
 import kakaoLogo from "../../assets/logo/kakao.png";
 import naverLogo from "../../assets/logo/naver.png";
