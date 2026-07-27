@@ -16,6 +16,16 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
+      workbox: {
+        // navigateFallback은 모든 navigation 요청을 index.html로 돌려버린다.
+        // OAuth 시작/콜백과 API는 서버(프록시)의 302·응답을 그대로 받아야 하므로
+        // 서비스 워커가 가로채지 않도록 제외한다.
+        navigateFallbackDenylist: [
+          /^\/api\//,
+          /^\/oauth2\//,
+          /^\/login\/oauth2\//,
+        ],
+      },
       manifest: {
         id: "/",
         name: "gudocs",
