@@ -7,7 +7,7 @@ import {
   Text,
 } from "@astryxdesign/core";
 import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useFlow } from "@stackflow/react";
 import { useSubscriptionsQuery } from "../../hooks/query/useSubscriptionsQuery";
 import ServiceLogo from "../../components/service-logo";
 import { CATEGORY_META } from "../../constants/category";
@@ -18,7 +18,7 @@ import type { SubscriptionDetail } from "../../types/subscribe";
 import EmptySubscription from "../home/empty-subscription";
 
 function ListView() {
-  const navigate = useNavigate();
+  const { push } = useFlow();
   const { data: subscriptions } = useSubscriptionsQuery({});
 
   // 카테고리별로 묶어서 섹션 구성
@@ -63,7 +63,9 @@ function ListView() {
                   <ListItem
                     key={item.id}
                     className={isPaused ? "opacity-50" : undefined}
-                    onClick={() => navigate(`/subscribe/${item.id}`)}
+                    onClick={() =>
+                      push("SubscribeDetail", { id: String(item.id) })
+                    }
                     startContent={
                       <ServiceLogo
                         name={item.serviceName}

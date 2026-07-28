@@ -12,10 +12,10 @@ import { Text } from "@astryxdesign/core/Text";
 import ServiceLogo from "../../components/service-logo";
 import { formatWon } from "../../utils/format";
 import { daysSince } from "../../utils/date";
-import { useNavigate } from "react-router-dom";
+import { useFlow } from "@stackflow/react";
 
 function SubscriptionCard() {
-  const navigate = useNavigate();
+  const { push, replace } = useFlow();
   const { data } = useSubscriptionsQuery({});
 
   const subscribeList = [...data].splice(0, 3);
@@ -34,14 +34,14 @@ function SubscriptionCard() {
             icon={<Icon icon="chevronRight" size="sm" color="tertiary" />}
             variant="ghost"
             size="sm"
-            onClick={() => navigate("/subscribe")}
+            onClick={() => replace("Subscribe", {}, { animate: false })}
           />
         </div>
         <List className="mt-3" density="spacious">
           {subscribeList.map((item) => {
             return (
               <ListItem
-                onClick={() => navigate(`/subscribe/${item.id}`)}
+                onClick={() => push("SubscribeDetail", { id: String(item.id) })}
                 startContent={
                   <ServiceLogo
                     name={item.serviceName}

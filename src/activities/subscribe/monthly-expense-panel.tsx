@@ -4,7 +4,7 @@ import type { MonthlyDetailData } from "../../types/expenses";
 import ServiceLogo from "../../components/service-logo";
 import { formatWon } from "../../utils/format";
 import { toDayOfMonth } from "../../utils/date";
-import { useNavigate } from "react-router-dom";
+import { useFlow } from "@stackflow/react";
 
 type Props = {
   subscriptions: MonthlyDetailData["subscriptions"];
@@ -12,9 +12,8 @@ type Props = {
 };
 
 function MonthlyExpensePanel({ subscriptions, month }: Props) {
-  const navigate = useNavigate();
+  const { push } = useFlow();
 
-  // 결제일(firstBillingDate의 일) 기준으로 묶고, 결제일 정렬 + 일자별 합계 계산
   const groupsByDay = useMemo(() => {
     const byDay = new Map<number, typeof subscriptions>();
     for (const item of subscriptions) {
@@ -59,7 +58,9 @@ function MonthlyExpensePanel({ subscriptions, month }: Props) {
               return (
                 <ListItem
                   onClick={() => {
-                    navigate(`/subscribe/${item.subscriptionId}`);
+                    push("SubscribeDetail", {
+                      id: String(item.subscriptionId),
+                    });
                   }}
                   startContent={<ServiceLogo name={item.serviceName} />}
                   key={item.subscriptionId}

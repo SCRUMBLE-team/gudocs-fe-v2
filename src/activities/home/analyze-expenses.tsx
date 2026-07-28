@@ -1,6 +1,6 @@
 import { Button, Card, VStack, HStack, Text } from "@astryxdesign/core";
 import { ResponsiveContainer, PieChart, Pie, Tooltip } from "recharts";
-import { useNavigate } from "react-router-dom";
+import { useFlow } from "@stackflow/react";
 import { CATEGORY_META } from "../../constants/category";
 import { PIE_PALETTE } from "../../constants/category-palette";
 import { useCategoryExpensesQuery } from "../../hooks/query/useCategoryExpensesQuery";
@@ -20,7 +20,7 @@ type Slice = {
 };
 
 function AnalyzeExpenses() {
-  const navigate = useNavigate();
+  const { push } = useFlow();
   const { data } = useCategoryExpensesQuery(getBaseYearMonth());
 
   // 카테고리가 하나도 없으면 도넛이 아예 그려지지 않으므로 안내로 대체한다.
@@ -122,7 +122,7 @@ function AnalyzeExpenses() {
               label="소비 분석 살펴보기"
               variant="primary"
               className="p-6"
-              onClick={() => navigate("/analyze")}
+              onClick={() => push("Analyze", {})}
             />
           </>
         )}
