@@ -11,7 +11,7 @@ function EmptySubscription() {
         message="아직 등록하신 구독 서비스가 없어요"
         action={{
           label: "구독 서비스 등록하러가기",
-          onClick: () => push("SubscribeNew", {}),
+          onClick: () => push("SubscribeNewStart", {}),
         }}
       />
     </Card>

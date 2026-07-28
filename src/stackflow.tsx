@@ -11,8 +11,10 @@ import OnboardingActivity from "./activities/onboarding";
 import HomeActivity from "./activities/home";
 import SubscribeActivity from "./activities/subscribe";
 import AnalyzeActivity from "./activities/analyze";
+import SubscribeNewStartActivity from "./activities/subscribe/new/start";
 import SubscribeNewActivity from "./activities/subscribe/new";
 import SubscribeNewPayActivity from "./activities/subscribe/new/pay";
+import SubscribeNewConfirmActivity from "./activities/subscribe/new/confirm";
 import SubscribeDetailActivity from "./activities/subscribe/detail";
 import SubscribeEditActivity from "./activities/subscribe/detail/edit";
 
@@ -39,8 +41,10 @@ export const { Stack } = stackflow({
     Home: withAuth(HomeActivity),
     Subscribe: withAuth(SubscribeActivity),
     Analyze: withAuth(AnalyzeActivity),
+    SubscribeNewStart: withAuth(SubscribeNewStartActivity),
     SubscribeNew: withAuth(SubscribeNewActivity),
     SubscribeNewPay: withAuth(SubscribeNewPayActivity),
+    SubscribeNewConfirm: withAuth(SubscribeNewConfirmActivity),
     SubscribeDetail: withAuth(SubscribeDetailActivity),
     SubscribeEdit: withAuth(SubscribeEditActivity),
   },
