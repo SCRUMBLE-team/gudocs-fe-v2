@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import type { MonthlyDetailData } from "../../types/expenses";
 import ServiceLogo from "../../components/service-logo";
 import { formatWon } from "../../utils/format";
+import { toDayOfMonth } from "../../utils/date";
 import { useNavigate } from "react-router-dom";
 
 type Props = {
@@ -13,13 +14,14 @@ type Props = {
 function MonthlyExpensePanel({ subscriptions, month }: Props) {
   const navigate = useNavigate();
 
-  // billingDay 기준으로 묶고, 결제일 정렬 + 일자별 합계 계산
+  // 결제일(firstBillingDate의 일) 기준으로 묶고, 결제일 정렬 + 일자별 합계 계산
   const groupsByDay = useMemo(() => {
     const byDay = new Map<number, typeof subscriptions>();
     for (const item of subscriptions) {
-      const list = byDay.get(item.billingDay) ?? [];
+      const day = toDayOfMonth(item.firstBillingDate);
+      const list = byDay.get(day) ?? [];
       list.push(item);
-      byDay.set(item.billingDay, list);
+      byDay.set(day, list);
     }
     return [...byDay.entries()]
       .sort(([dayA], [dayB]) => dayB - dayA)
