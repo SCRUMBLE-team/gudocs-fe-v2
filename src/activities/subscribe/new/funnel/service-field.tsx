@@ -7,7 +7,15 @@ import { useSubscribeContext } from "../subscribe-context";
 function ServiceField() {
   const { category, service, onChangeService } =
     useSubscribeContext("ServiceField");
-  const [custom, setCustom] = useState(false);
+  // 초기 서비스명이 목록에 없으면(OCR 인식 결과나 예전에 직접 입력한 값)
+  // 곧바로 자유 입력으로 연다. 목록형으로 두면 SheetSelectField가 짝을 못 찾아
+  // 값이 state에는 있는데 화면에는 placeholder가 보인다.
+  const [custom, setCustom] = useState(
+    () =>
+      category != null &&
+      !!service &&
+      !CATEGORY_SERVICES[category].some((option) => option.name === service),
+  );
   const [prevCategory, setPrevCategory] = useState(category);
 
   // 카테고리가 바뀌면 고른 서비스는 무효가 되므로 초기화한다.
