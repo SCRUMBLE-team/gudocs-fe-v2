@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useFlow } from "@stackflow/react";
 import { VStack } from "@astryxdesign/core/VStack";
 import { Heading } from "@astryxdesign/core/Heading";
 import { useToast } from "@astryxdesign/core/Toast";
@@ -19,14 +19,10 @@ import { useEditSubscriptionMutation } from "../../../../hooks/query/useEditSubs
 import { fromISODate } from "../../../../utils/date";
 
 function EditForm({ id }: { id: string }) {
-  const navigate = useNavigate();
+  const { pop } = useFlow();
   const showToast = useToast();
   const { data } = useSubscriptionQuery(id);
   const { mutate, isPending } = useEditSubscriptionMutation();
-
-  // 기존 값으로 시드. 퍼널 필드들은 SubscribeContext에 바인딩돼 있어 그대로 재사용한다.
-  // ServiceField 옵션은 서비스 '이름'을 value로 쓰므로 serviceName을 그대로 시드하면
-  // SheetSelectField가 옵션과 매칭돼 기본값이 채워진다.
   const [category, setCategory] = useState(data.category);
   const [service, setService] = useState<string | null>(data.serviceName);
   const [billingCycle, setBillingCycle] = useState(data.billingCycle);
@@ -46,7 +42,6 @@ function EditForm({ id }: { id: string }) {
     onChangePrice: setPrice,
     paymentDate,
     onChangePaymentDate: setPaymentDate,
-    onChangeStep: () => {},
   };
 
   const payload = toSubscribePayload(contextValue);
@@ -61,7 +56,8 @@ function EditForm({ id }: { id: string }) {
       {
         onSuccess: () => {
           showToast({ body: "구독 정보를 수정했어요" });
-          navigate(`/subscribe/${id}`);
+          // 수정 화면은 상세 위에 쌓여 있다. 닫으면 바로 아래가 상세다.
+          pop();
         },
         onError: () =>
           showToast({

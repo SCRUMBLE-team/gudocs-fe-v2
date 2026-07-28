@@ -10,6 +10,7 @@ import { useCategoryExpensesQuery } from "../../hooks/query/useCategoryExpensesQ
 import { useMonthlyExpenseDetailQuery } from "../../hooks/query/useMonthlyExpensesDetailsQuery";
 import type { CategoryExpenseData } from "../../types/expenses";
 import { formatWon } from "../../utils/format";
+import { useFlow } from "@stackflow/react";
 
 const TOP_COUNT = 5;
 const TOP_SERVICE_COUNT = 3;
@@ -53,7 +54,7 @@ function buildSegments(
 function AnalyzeContent({ year, month }: { year: number; month: number }) {
   const { data } = useCategoryExpensesQuery({ year, month });
   const { data: detail } = useMonthlyExpenseDetailQuery({ year, month });
-
+  const { push } = useFlow();
   const segments = buildSegments(data.categories);
 
   // 지출이 큰 서비스 TOP 3 — 삭제된 구독 제외, 월 환산 금액 내림차순.
@@ -90,7 +91,6 @@ function AnalyzeContent({ year, month }: { year: number; month: number }) {
         </Text>
       </VStack>
 
-      {/* 가로 스택 바 */}
       <HStack
         className="overflow-hidden rounded-full"
         height={12}
@@ -109,7 +109,6 @@ function AnalyzeContent({ year, month }: { year: number; month: number }) {
         ))}
       </HStack>
 
-      {/* 카테고리 리스트 */}
       <VStack gap={3}>
         {segments.map((seg) => (
           <HStack key={seg.key} justify="between" align="center">
@@ -141,6 +140,11 @@ function AnalyzeContent({ year, month }: { year: number; month: number }) {
               const isFirst = i === 0;
               return (
                 <ListItem
+                  onClick={() =>
+                    push("SubscribeDetail", {
+                      id: String(service.subscriptionId),
+                    })
+                  }
                   key={service.subscriptionId}
                   className="p-0 py-1"
                   startContent={

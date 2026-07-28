@@ -8,7 +8,7 @@ import {
   Text,
 } from "@astryxdesign/core";
 import { useState, type ReactNode, type SVGProps } from "react";
-import { useNavigate } from "react-router-dom";
+import { useFlow } from "@stackflow/react";
 import { useToast } from "@astryxdesign/core/Toast";
 import BottomSheet from "../../../components/bottom-sheet";
 import ServiceLogo from "../../../components/service-logo";
@@ -87,7 +87,7 @@ function InfoRow({
 }
 
 function SubscriptionDetailContent({ id }: { id: string }) {
-  const navigate = useNavigate();
+  const { push, pop } = useFlow();
   const showToast = useToast();
   const { data } = useSubscriptionQuery(id);
   const changeStatus = useChangeSubscribeStatusMutation();
@@ -96,7 +96,7 @@ function SubscriptionDetailContent({ id }: { id: string }) {
 
   const isPaused = data.status === "PAUSED";
   const meta = CATEGORY_META[data.category];
-  const goEdit = () => navigate(`/subscribe/${id}/edit`);
+  const goEdit = () => push("SubscribeEdit", { id });
 
   async function handleToggleActive(isActive: boolean) {
     const nextStatus = isActive ? "ACTIVE" : "PAUSED";
@@ -123,7 +123,7 @@ function SubscriptionDetailContent({ id }: { id: string }) {
     remove.mutate(id, {
       onSuccess: () => {
         showToast({ body: "구독을 삭제했어요" });
-        navigate("/subscribe");
+        pop();
       },
       onError: () =>
         showToast({
@@ -174,7 +174,6 @@ function SubscriptionDetailContent({ id }: { id: string }) {
         </HStack>
       </VStack>
 
-      {/* 설정(수정 진입) 그룹 */}
       <VStack paddingInline={5}>
         <InfoRow
           label="카테고리"
