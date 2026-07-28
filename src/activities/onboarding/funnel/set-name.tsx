@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useFlow } from "@stackflow/react";
 import { VStack } from "@astryxdesign/core/VStack";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Button } from "@astryxdesign/core/Button";
@@ -17,7 +17,7 @@ export type SetNameProps = {
 };
 
 function SetName({ name, onChangeName }: SetNameProps) {
-  const navigate = useNavigate();
+  const { replace } = useFlow();
   const showToast = useToast();
   const { mutate, isPending } = useChangeNameMutation();
 
@@ -31,9 +31,9 @@ function SetName({ name, onChangeName }: SetNameProps) {
 
     mutate(trimmedName, {
       onSuccess: () => {
-        // 온보딩은 히스토리에 남기지 않는다. 홈에서 뒤로 가기를 눌렀을 때
+        // 온보딩은 스택에 남기지 않는다. 홈에서 뒤로 가기를 눌렀을 때
         // 이름 설정 화면으로 되돌아오면 안 된다.
-        navigate("/", { replace: true });
+        replace("Home", {}, { animate: false });
       },
       onError: (error) => {
         // 세션이 끊긴 상태로 온보딩에 들어온 경우엔 재시도해도 소용없다.
@@ -44,7 +44,7 @@ function SetName({ name, onChangeName }: SetNameProps) {
             isAutoHide: true,
             autoHideDuration: 3000,
           });
-          navigate("/login", { replace: true });
+          replace("Login", {}, { animate: false });
           return;
         }
 
