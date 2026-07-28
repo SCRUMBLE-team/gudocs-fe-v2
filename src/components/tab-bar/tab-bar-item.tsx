@@ -2,10 +2,10 @@ import type { ComponentType, SVGProps } from "react";
 import { VStack } from "@astryxdesign/core/VStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Text } from "@astryxdesign/core/Text";
-import { useLocation } from "react-router-dom";
+import { useActivity } from "@stackflow/react";
 
 export type TabBarItemProps = {
-  /** TabBar의 value와 비교되는 탭 고유값 */
+  /** 이 탭이 가리키는 액티비티 이름 */
   value: string;
   /** 탭 아래 표시될 라벨 */
   label: string;
@@ -23,8 +23,8 @@ export function TabBarItem({
   activeIcon,
   onClick,
 }: TabBarItemProps) {
-  const location = useLocation();
-  const isActive = location.pathname === value;
+  // 탭바를 그리는 액티비티가 곧 현재 탭이다.
+  const isActive = useActivity().name === value;
 
   return (
     <VStack
