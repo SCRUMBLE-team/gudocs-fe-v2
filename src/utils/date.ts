@@ -14,6 +14,14 @@ export function toYearMonth(iso: string) {
 }
 
 /**
+ * "YYYY-MM-DD" ISO 문자열에서 일(day)만 뽑는다.
+ * Date를 거치면 타임존 때문에 날짜가 밀릴 수 있어 문자열 그대로 다룬다.
+ */
+export function toDayOfMonth(iso: string) {
+  return Number(iso.split("-")[2]);
+}
+
+/**
  * Date -> "YYYY-MM-DD".
  * toISOString()은 UTC로 변환하므로 한국 시간 자정 근처에서 날짜가 하루
  * 밀린다. 로컬 기준 연·월·일을 그대로 조합한다.

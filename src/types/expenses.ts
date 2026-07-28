@@ -47,8 +47,7 @@ export interface MonthlyDetailData {
     billingCycle: string;
     originalPrice: number;
     appliedMonthlyAmount: number;
-    billingDay: number;
-    billingMonth: number;
+    firstBillingDate: string;
     paymentMethod: string;
     status: string;
     deleted: boolean;

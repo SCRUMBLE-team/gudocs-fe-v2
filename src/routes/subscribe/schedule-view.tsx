@@ -3,7 +3,7 @@ import type { ISODateString } from "@astryxdesign/core/Calendar";
 import { VStack } from "@astryxdesign/core/VStack";
 import { useMemo, useState, useTransition } from "react";
 import { useMonthlyExpenseDetailQuery } from "../../hooks/query/useMonthlyExpensesDetailsQuery";
-import { toYearMonth } from "../../utils/date";
+import { toDayOfMonth, toYearMonth } from "../../utils/date";
 import MonthlyExpensePanel from "./monthly-expense-panel";
 
 const today = new Date().toISOString().slice(0, 10) as ISODateString;
@@ -19,7 +19,7 @@ function ScheduleView() {
   } = useMonthlyExpenseDetailQuery({ year, month });
 
   const billableDays = useMemo(
-    () => new Set(subscriptions?.map((s) => s.billingDay)),
+    () => new Set(subscriptions?.map((s) => toDayOfMonth(s.firstBillingDate))),
     [subscriptions],
   );
 
@@ -36,7 +36,9 @@ function ScheduleView() {
   // 날을 선택하면 그 날의 결제만, 아니면 이 달 전체
   const visibleSubscriptions =
     selectedDay != null
-      ? subscriptions?.filter((s) => s.billingDay === selectedDay)
+      ? subscriptions?.filter(
+          (s) => toDayOfMonth(s.firstBillingDate) === selectedDay,
+        )
       : subscriptions;
 
   return (
