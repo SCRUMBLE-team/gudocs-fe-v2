@@ -42,3 +42,20 @@ export interface SubscriptionDetail {
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * 결제 알림 캡처·영수증 이미지의 OCR 인식 결과.
+ *
+ * 서버가 best-effort로 파싱하므로 어떤 필드든 null일 수 있다. 값이 와도 우리가
+ * 아는 코드값이라는 보장이 없어서, 폼에 넣기 전에 toSubscribeDraft로 한 번 거른다.
+ */
+export type OcrScanResult = {
+  serviceName: string | null;
+  category: SubscribeCategory | null;
+  price: number | null;
+  billingCycle: BillingCycle | null;
+  /** "YYYY-MM-DD" */
+  firstBillingDate: string | null;
+  /** 등록 요청 본문에는 없는 필드라 폼에서는 쓰지 않는다. */
+  paymentMethod: PaymentMethod | null;
+};
