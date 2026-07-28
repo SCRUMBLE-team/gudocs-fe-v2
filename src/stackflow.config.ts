@@ -1,4 +1,5 @@
 import { defineConfig } from "@stackflow/config";
+import type { SubscribeConfirmParams } from "./activities/subscribe/new/to-subscribe-draft";
 import type { SubscribeCategory } from "./types/subscribe";
 
 /**
@@ -17,8 +18,10 @@ export const config = defineConfig({
     { name: "Home", route: "/" },
     { name: "Subscribe", route: "/subscribe" },
     { name: "Analyze", route: "/analyze" },
-    { name: "SubscribeNew", route: "/subscribe/new" },
+    { name: "SubscribeNewStart", route: "/subscribe/new" },
+    { name: "SubscribeNew", route: "/subscribe/new/service" },
     { name: "SubscribeNewPay", route: "/subscribe/new/pay" },
+    { name: "SubscribeNewConfirm", route: "/subscribe/new/confirm" },
     { name: "SubscribeDetail", route: "/subscribe/:id" },
     { name: "SubscribeEdit", route: "/subscribe/:id/edit" },
   ],
@@ -33,8 +36,12 @@ declare module "@stackflow/config" {
     Home: Record<string, never>;
     Subscribe: { tab?: "일정" | "목록" };
     Analyze: Record<string, never>;
+    SubscribeNewStart: Record<string, never>;
     SubscribeNew: Record<string, never>;
     SubscribeNewPay: { category: SubscribeCategory; service: string };
+    // historySync가 URL에 실었다 새로고침 때 문자열로 복원하므로 price도 string이다.
+    // 파싱·검증은 받는 쪽 toSubscribeDraft가 맡는다.
+    SubscribeNewConfirm: SubscribeConfirmParams;
     SubscribeDetail: { id: string };
     SubscribeEdit: { id: string };
   }

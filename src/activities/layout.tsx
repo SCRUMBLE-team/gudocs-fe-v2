@@ -49,7 +49,7 @@ function TabLayout({ children }: { children: ReactNode }) {
         </HStack>
         {children}
       </VStack>
-      <Fab onClick={() => push("SubscribeNew", {})} />
+      <Fab onClick={() => push("SubscribeNewStart", {})} />
       <TabBar>
         {TABS.map(({ activity: target, label, icon }) => (
           <TabBar.Item
