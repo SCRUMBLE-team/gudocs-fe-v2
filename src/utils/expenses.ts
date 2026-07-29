@@ -15,19 +15,19 @@ export function recentTrend(monthlyTrends: TrendData["monthlyTrends"]) {
 }
 
 /**
- * 지출 금액을 세는 두 가지 기준.
+ * 지출 금액을 세는 두 가지 기준. 총액은 양쪽 다 서버가 내려준다.
  *
- * CONVERTED — 연간 구독을 12로 나눠 매달 얹는다. 서버가 totalAmount /
- *   appliedMonthlyAmount를 이 기준으로 내려주므로 홈·소비 분석 숫자와 항상 맞는다.
- * ACTUAL — 그 달에 실제로 청구되는 금액. 연간 구독은 청구되는 달에만 1년치가 잡히고
- *   나머지 달엔 0이다. 서버 수치와 일부러 어긋나므로 화면에 기준을 밝혀야 한다.
+ * CONVERTED — 연간 구독을 12로 나눠 매달 얹는다(totalAmount).
+ *   홈 요약 카드·소비 분석이 쓰는 기준이라 숫자가 항상 맞는다.
+ * ACTUAL — 그 달에 실제로 청구되는 금액(actualAmount). 연간 구독은 청구되는
+ *   달에만 1년치가 잡힌다. CONVERTED와 일부러 어긋나므로 화면에 기준을 밝힌다.
  */
 export type AmountBasis = "CONVERTED" | "ACTUAL";
 
 export type BillingItem = MonthlyDetailData["subscriptions"][number];
 
 /**
- * 지출로 셀 항목인지.
+ * 목록에 띄울 항목인지.
  *
  * 삭제된 구독은 서버가 이력 때문에 계속 내려주고, 일시정지된 구독은 결제가 나가지
  * 않는다. 둘 다 "이 달에 실제로 쓴 돈"이 아니라서 뺀다.
@@ -45,25 +45,4 @@ export function isCountable(item: BillingItem): boolean {
 export function isBilledIn(item: BillingItem, month: number): boolean {
   if (item.billingCycle === "MONTHLY") return true;
   return toYearMonth(item.firstBillingDate).month === month;
-}
-
-/** 기준에 따른 이 달 금액. 청구되지 않는 달의 연간 구독은 0이다. */
-export function amountFor(
-  item: BillingItem,
-  month: number,
-  basis: AmountBasis,
-): number {
-  if (basis === "CONVERTED") return item.appliedMonthlyAmount;
-  return isBilledIn(item, month) ? item.originalPrice : 0;
-}
-
-/** 한 달치 구독 목록의 합계. 셀 수 없는 항목과 청구되지 않는 달은 자동으로 빠진다. */
-export function sumMonth(
-  subscriptions: BillingItem[],
-  month: number,
-  basis: AmountBasis,
-): number {
-  return subscriptions
-    .filter(isCountable)
-    .reduce((sum, item) => sum + amountFor(item, month, basis), 0);
 }
