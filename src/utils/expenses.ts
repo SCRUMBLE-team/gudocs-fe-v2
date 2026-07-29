@@ -29,11 +29,17 @@ export type BillingItem = MonthlyDetailData["subscriptions"][number];
 /**
  * 목록에 띄울 항목인지.
  *
- * 삭제된 구독은 서버가 이력 때문에 계속 내려주고, 일시정지된 구독은 결제가 나가지
- * 않는다. 둘 다 "이 달에 실제로 쓴 돈"이 아니라서 뺀다.
+ * 삭제된 구독만 뺀다 — 서버가 이력 때문에 계속 내려주지만 화면에 띄울 이유가 없다.
+ * 일시정지는 결제가 나가지 않을 뿐 구독은 살아 있으므로, 목록에는 두고 흐리게
+ * 표시한다(isPaused).
  */
-export function isCountable(item: BillingItem): boolean {
-  return !item.deleted && item.status === "ACTIVE";
+export function isListed(item: BillingItem): boolean {
+  return !item.deleted;
+}
+
+/** 결제가 멈춘 구독인지. 목록에서 흐리게 그리고 합계에서 뺀다. */
+export function isPaused(item: BillingItem): boolean {
+  return item.status === "PAUSED";
 }
 
 /**

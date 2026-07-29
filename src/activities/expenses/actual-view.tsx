@@ -3,7 +3,7 @@ import { useMonthlyExpenseQuery } from "../../hooks/query/useMonthlyExpenseQuery
 import { useMonthlyExpensesQueries } from "../../hooks/query/useMonthlyExpensesQueries";
 import { useMonthlyExpenseDetailQuery } from "../../hooks/query/useMonthlyExpensesDetailsQuery";
 import { toDayOfMonth } from "../../utils/date";
-import { isBilledIn, isCountable, recentTrend } from "../../utils/expenses";
+import { isBilledIn, isListed, isPaused, recentTrend } from "../../utils/expenses";
 import ExpensesView, { type ExpenseRow } from "./expenses-view";
 
 type Props = {
@@ -50,7 +50,7 @@ function ActualView({ base, selected, onSelectMonth }: Props) {
       : null;
 
   const rows: ExpenseRow[] = detail.subscriptions
-    .filter(isCountable)
+    .filter(isListed)
     .filter((item) => isBilledIn(item, selected.month))
     .map((item) => ({
       subscriptionId: item.subscriptionId,
@@ -59,6 +59,7 @@ function ActualView({ base, selected, onSelectMonth }: Props) {
       amount: item.originalPrice,
       note: item.billingCycle === "YEARLY" ? "1년치 결제 금액" : undefined,
       day: toDayOfMonth(item.firstBillingDate),
+      isPaused: isPaused(item),
     }));
 
   return (

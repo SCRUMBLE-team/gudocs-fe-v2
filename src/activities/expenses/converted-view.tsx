@@ -2,7 +2,7 @@ import { useExpensesTrendsQuery } from "../../hooks/query/useExpensesTrendsQuery
 import { useMonthlyExpenseQuery } from "../../hooks/query/useMonthlyExpenseQuery";
 import { useMonthlyExpenseDetailQuery } from "../../hooks/query/useMonthlyExpensesDetailsQuery";
 import { toDayOfMonth } from "../../utils/date";
-import { isCountable, recentTrend } from "../../utils/expenses";
+import { isListed, isPaused, recentTrend } from "../../utils/expenses";
 import { formatWon } from "../../utils/format";
 import ExpensesView, { type ExpenseRow } from "./expenses-view";
 
@@ -25,7 +25,7 @@ function ConvertedView({ base, selected, onSelectMonth }: Props) {
   const { data: detail } = useMonthlyExpenseDetailQuery(selected);
 
   const rows: ExpenseRow[] = detail.subscriptions
-    .filter(isCountable)
+    .filter(isListed)
     .map((item) => ({
       subscriptionId: item.subscriptionId,
       serviceName: item.serviceName,
@@ -36,6 +36,7 @@ function ConvertedView({ base, selected, onSelectMonth }: Props) {
           ? `연 ${formatWon(item.originalPrice)} ÷ 12`
           : undefined,
       day: toDayOfMonth(item.firstBillingDate),
+      isPaused: isPaused(item),
     }));
 
   return (

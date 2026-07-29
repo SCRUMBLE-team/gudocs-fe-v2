@@ -22,6 +22,8 @@ export type ExpenseRow = {
   note?: string;
   /** 결제일(일). 일자별 그룹핑에 쓴다. */
   day: number;
+  /** 일시정지된 구독. 결제가 나가지 않으므로 흐리게 그리고 합계에서 뺀다. */
+  isPaused: boolean;
 };
 
 /**
@@ -203,7 +205,10 @@ function ExpenseList({ rows, month }: { rows: ExpenseRow[]; month: number }) {
       .map(([day, items]) => ({
         day,
         items,
-        total: items.reduce((sum, item) => sum + item.amount, 0),
+        // 일시정지 구독은 실제로 빠져나가지 않으므로 그 날 합계에서 뺀다.
+        total: items
+          .filter((item) => !item.isPaused)
+          .reduce((sum, item) => sum + item.amount, 0),
       }));
   }, [rows]);
 
@@ -223,6 +228,8 @@ function ExpenseList({ rows, month }: { rows: ExpenseRow[]; month: number }) {
             {items.map((item) => (
               <ListItem
                 key={item.subscriptionId}
+                // 흐리게만 두면 색을 못 보는 사용자에게는 신호가 없어서 뱃지를 같이 단다.
+                className={item.isPaused ? "opacity-50" : undefined}
                 onClick={() =>
                   push("SubscribeDetail", { id: String(item.subscriptionId) })
                 }
@@ -234,6 +241,9 @@ function ExpenseList({ rows, month }: { rows: ExpenseRow[]; month: number }) {
                     </Text>
                     {item.billingCycle === "YEARLY" && (
                       <Badge variant="neutral" label="연간" />
+                    )}
+                    {item.isPaused && (
+                      <Badge variant="neutral" label="일시정지" />
                     )}
                   </HStack>
                 }
