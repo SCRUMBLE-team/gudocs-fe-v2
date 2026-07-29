@@ -1,4 +1,9 @@
-import type { SubscribeCategory } from "./subscribe";
+import type {
+  BillingCycle,
+  PaymentMethod,
+  SubscribeCategory,
+  SubscribeStatus,
+} from "./subscribe";
 
 // GET /api/subscriptions/expenses/monthly
 export interface MonthlyExpense {
@@ -8,7 +13,12 @@ export interface MonthlyExpense {
   previousMonthAmount: number;
   changeAmount: number;
   changeRate: number;
+  // 월간 구독 합계. 연간 구독은 빠져 있다.
   monthlySubscriptionAmount: number;
+  // 이 달에 실제로 청구되는 금액. 연간 구독은 청구되는 달에만 1년치가 잡힌다.
+  // totalAmount(월 환산)와 일부러 다르다.
+  actualAmount: number;
+  // 연간 구독의 월 환산분. totalAmount에 이미 더해져 있다.
   annualSubscriptionMonthlyConvertedAmount: number;
 }
 
@@ -44,12 +54,14 @@ export interface MonthlyDetailData {
     serviceName: string;
     category: SubscribeCategory;
     categoryName: string;
-    billingCycle: string;
+    billingCycle: BillingCycle;
+    // 구독에 등록된 원래 청구 금액. 연간이면 1년치다.
     originalPrice: number;
+    // 월 환산 금액. 연간 구독은 서버가 originalPrice를 12로 나눠 매달 얹어준다.
     appliedMonthlyAmount: number;
     firstBillingDate: string;
-    paymentMethod: string;
-    status: string;
+    paymentMethod: PaymentMethod;
+    status: SubscribeStatus;
     deleted: boolean;
   }[];
 }

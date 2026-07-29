@@ -2,42 +2,18 @@ import { Card } from "@astryxdesign/core/Card";
 import { VStack } from "@astryxdesign/core/VStack";
 import { Text } from "@astryxdesign/core/Text";
 import { Button } from "@astryxdesign/core/Button";
+import { useFlow } from "@stackflow/react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, LabelList } from "recharts";
 import { useMonthlyExpenseQuery } from "../../hooks/query/useMonthlyExpenseQuery";
 import { useExpensesTrendsQuery } from "../../hooks/query/useExpensesTrendsQuery";
 import { getBaseYearMonth } from "../../utils/date";
 import { formatWon } from "../../utils/format";
+import ChangeText from "../../components/change-text";
 import CardEmptyMessage from "./card-empty-message";
 import barchartLottie from "../../assets/lottie/bar_chart.json";
 
-// 전월 대비 문구. 덜 썼으면 금액을 파란색(accent), 더 썼으면 빨간색(text-red) 토큰으로 강조한다.
-function ChangeText({ changeAmount }: { changeAmount: number }) {
-  if (changeAmount === 0) {
-    return <Text type="supporting">지난달과 동일하게 쓰는 중</Text>;
-  }
-
-  const spentLess = changeAmount < 0;
-  const amountColor = spentLess
-    ? "text-[var(--color-accent)]"
-    : "text-[var(--color-text-red)]";
-
-  return (
-    <Text type="supporting">
-      지난달 대비{" "}
-      <Text
-        type="supporting"
-        weight="bold"
-        color="inherit"
-        className={amountColor}
-      >
-        {formatWon(Math.abs(changeAmount))}
-      </Text>{" "}
-      {spentLess ? "덜" : "더"} 쓰는 중
-    </Text>
-  );
-}
-
 function SpendingSummary() {
+  const { push } = useFlow();
   const baseParams = getBaseYearMonth();
   const { data: monthly } = useMonthlyExpenseQuery(baseParams);
   const { data: trends } = useExpensesTrendsQuery(baseParams);
@@ -97,6 +73,7 @@ function SpendingSummary() {
               label="지출 금액 자세히 보러가기"
               variant="primary"
               className="p-6"
+              onClick={() => push("Expenses", {})}
             />
           </>
         ) : (
