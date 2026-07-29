@@ -11,6 +11,7 @@ import OnboardingActivity from "./activities/onboarding";
 import HomeActivity from "./activities/home";
 import SubscribeActivity from "./activities/subscribe";
 import AnalyzeActivity from "./activities/analyze";
+import ExpensesActivity from "./activities/expenses";
 import SubscribeNewStartActivity from "./activities/subscribe/new/start";
 import SubscribeNewActivity from "./activities/subscribe/new";
 import SubscribeNewPayActivity from "./activities/subscribe/new/pay";
@@ -41,6 +42,7 @@ export const { Stack } = stackflow({
     Home: withAuth(HomeActivity),
     Subscribe: withAuth(SubscribeActivity),
     Analyze: withAuth(AnalyzeActivity),
+    Expenses: withAuth(ExpensesActivity),
     SubscribeNewStart: withAuth(SubscribeNewStartActivity),
     SubscribeNew: withAuth(SubscribeNewActivity),
     SubscribeNewPay: withAuth(SubscribeNewPayActivity),
