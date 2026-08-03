@@ -1,4 +1,5 @@
 import { List, ListItem } from "@astryxdesign/core";
+import { Button } from "@astryxdesign/core/Button";
 import { VStack } from "@astryxdesign/core/VStack";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
@@ -11,6 +12,8 @@ import { useMonthlyExpenseDetailQuery } from "../../hooks/query/useMonthlyExpens
 import type { CategoryExpenseData } from "../../types/expenses";
 import { formatWon } from "../../utils/format";
 import { useFlow } from "@stackflow/react";
+import Lottie from "lottie-react";
+import discountLottie from "../../assets/lottie/discount.json";
 
 const TOP_COUNT = 5;
 const TOP_SERVICE_COUNT = 3;
@@ -181,6 +184,23 @@ function AnalyzeContent({ year, month }: { year: number; month: number }) {
               );
             })}
           </List>
+        </VStack>
+      )}
+
+      {topServices.length > 0 && (
+        <VStack gap={2}>
+          <Text type="large" weight="bold">
+            구독을 정리하면 얼마나 아낄까요?
+          </Text>
+          <Text type="supporting" color="secondary">
+            체크만 해보면 월 구독료가 얼마나 줄어드는지 알려드려요
+          </Text>
+          <Lottie animationData={discountLottie} loop />
+          <Button
+            label="절약 금액 계산해보기"
+            size="lg"
+            onClick={() => push("Savings", {})}
+          />
         </VStack>
       )}
     </VStack>

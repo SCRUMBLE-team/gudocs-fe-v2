@@ -43,6 +43,6 @@ export function fromISODate(value: string) {
 export function daysSince(isoDate: string): number {
   const then = new Date(isoDate).getTime();
   if (Number.isNaN(then)) return 0;
-  const diffDays = Math.floor((Date.now() - then) / 86_400_000);
+  const diffDays = Math.floor((then - Date.now()) / 86_400_000);
   return Math.max(0, diffDays);
 }
