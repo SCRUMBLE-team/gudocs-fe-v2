@@ -12,6 +12,7 @@ import HomeActivity from "./activities/home";
 import SubscribeActivity from "./activities/subscribe";
 import AnalyzeActivity from "./activities/analyze";
 import ExpensesActivity from "./activities/expenses";
+import MyActivity from "./activities/my";
 import SubscribeNewStartActivity from "./activities/subscribe/new/start";
 import SubscribeNewActivity from "./activities/subscribe/new";
 import SubscribeNewPayActivity from "./activities/subscribe/new/pay";
@@ -43,6 +44,7 @@ export const { Stack } = stackflow({
     Subscribe: withAuth(SubscribeActivity),
     Analyze: withAuth(AnalyzeActivity),
     Expenses: withAuth(ExpensesActivity),
+    My: withAuth(MyActivity),
     SubscribeNewStart: withAuth(SubscribeNewStartActivity),
     SubscribeNew: withAuth(SubscribeNewActivity),
     SubscribeNewPay: withAuth(SubscribeNewPayActivity),
@@ -60,7 +62,7 @@ export const { Stack } = stackflow({
     }),
     historySyncPlugin({
       config,
-      // 등록되지 않은 경로(/stats, /my 등)로 들어와도 흰 화면 대신 홈을 띄운다.
+      // 등록되지 않은 경로(/stats 등)로 들어와도 흰 화면 대신 홈을 띄운다.
       fallbackActivity: () => "Home",
       useHash: false,
     }),
