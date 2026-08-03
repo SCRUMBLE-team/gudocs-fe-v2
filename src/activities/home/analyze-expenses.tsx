@@ -41,7 +41,7 @@ function AnalyzeExpenses() {
   if (rest.length > 0) {
     rawSlices.push({
       key: "ETC_REST",
-      name: "기타",
+      name: "그 외",
       emoji: CATEGORY_META.ETC.emoji,
       amount: rest.reduce((sum, c) => sum + c.amount, 0),
     });

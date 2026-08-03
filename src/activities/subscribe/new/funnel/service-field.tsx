@@ -36,7 +36,6 @@ function ServiceField() {
         placeholder="서비스명"
         value={service ?? ""}
         onChange={onChangeService}
-        hasAutoFocus
       />
     );
   }
