@@ -27,7 +27,7 @@ function SubscriptionCard() {
       <Card className="border-gray-300">
         <div className="flex items-center justify-between">
           <Text type="large" weight="bold">
-            최근에 등록하신 서비스에요
+            구독료 결제 일정
           </Text>
           <IconButton
             label="구독 전체 보기"
@@ -63,7 +63,7 @@ function SubscriptionCard() {
                 endContent={
                   <Badge
                     variant="blue"
-                    label={`D-${daysSince(item.createdAt)}`}
+                    label={`D-${daysSince(item.nextBillingDate)}`}
                   />
                 }
               />

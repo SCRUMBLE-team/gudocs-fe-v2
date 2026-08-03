@@ -100,7 +100,7 @@ const SubscribeNewStartActivity: StaticActivityComponentType<
 
         <VStack paddingInline={4} paddingBlock={2} gap={5}>
           <Heading level={2} className="whitespace-pre-line">
-            {"구독을 어떻게\n등록할까요?"}
+            {"구독을 어떻게 등록할까요?"}
           </Heading>
 
           {isPending ? (
