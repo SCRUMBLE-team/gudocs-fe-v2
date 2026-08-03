@@ -1,11 +1,40 @@
-import { defineConfig } from "vite";
+import { defineConfig, type ProxyOptions } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import svgr from "vite-plugin-svgr";
 import { VitePWA } from "vite-plugin-pwa";
 
+// 백엔드 오리진. vercel.json의 rewrites destination과 같은 값을 유지해야 한다.
+const BACKEND_ORIGIN = "https://3-35-49-217.sslip.io";
+
+// 프록시로 넘길 경로. vercel.json의 rewrites source와 1:1로 대응한다.
+const PROXY_PATHS = ["/api", "/oauth2", "/login/oauth2"];
+
+const proxyOptions: ProxyOptions = {
+  target: BACKEND_ORIGIN,
+  changeOrigin: true,
+  configure: (proxy) => {
+    proxy.on("proxyRes", (proxyRes) => {
+      const setCookie = proxyRes.headers["set-cookie"];
+      if (!setCookie) return;
+      // 백엔드는 https라 쿠키에 Secure를 붙이지만 dev 서버는 http다.
+      // Chrome·Firefox는 localhost를 예외로 두지만 Safari는 Secure 쿠키를
+      // 거부하므로, dev에서만 이 속성을 떼어 브라우저 간 동작을 맞춘다.
+      proxyRes.headers["set-cookie"] = setCookie.map((cookie) =>
+        cookie.replace(/;\s*Secure/gi, ""),
+      );
+    });
+  },
+};
+
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    // 백엔드가 JSESSIONID를 SameSite=Lax로 내려주므로 cross-site 요청에서는
+    // 쿠키가 전송·저장되지 않는다(브라우저의 서드파티 쿠키 허용 설정과 무관하다).
+    // dev에서도 같은 오리진으로 요청해 first-party 쿠키로 만든다.
+    proxy: Object.fromEntries(PROXY_PATHS.map((path) => [path, proxyOptions])),
+  },
   plugins: [
     react(),
     tailwindcss(),
