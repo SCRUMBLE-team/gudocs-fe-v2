@@ -46,6 +46,10 @@ export default defineConfig({
         enabled: true,
       },
       workbox: {
+        // FCM 서비스 워커는 public/에 있어서 dist 루트로 복사되고, 그대로 두면
+        // 워크박스가 이걸 프리캐시한다. 서비스 워커 스크립트를 다른 SW가
+        // 캐싱하면 파일을 고쳐도 갱신이 늦게 반영되므로 목록에서 뺀다.
+        globIgnores: ["**/firebase-messaging-sw.js"],
         // navigateFallback은 모든 navigation 요청을 index.html로 돌려버린다.
         // OAuth 시작/콜백과 API는 서버(프록시)의 302·응답을 그대로 받아야 하므로
         // 서비스 워커가 가로채지 않도록 제외한다.
