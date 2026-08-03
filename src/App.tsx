@@ -1,4 +1,5 @@
 import { VStack } from "@astryxdesign/core/VStack";
+import PushBridge from "./components/push-bridge";
 import { Stack } from "./stackflow";
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
       maxWidth={480}
       className="relative mx-auto overflow-hidden bg-surface shadow-lg"
     >
+      <PushBridge />
       <Stack />
     </VStack>
   );
