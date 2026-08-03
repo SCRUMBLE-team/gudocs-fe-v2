@@ -1,6 +1,5 @@
-import { getId, getInstallations } from "firebase/installations";
-import { deleteToken, getToken } from "firebase/messaging";
-import { app, firebaseConfig, getMessagingIfSupported } from "./firebase";
+import { register, unregister } from "firebase/messaging";
+import { firebaseConfig, getMessagingIfSupported } from "./firebase";
 
 const FCM_SW_URL = "/firebase-messaging-sw.js";
 
@@ -20,7 +19,7 @@ export type PushPermission = NotificationPermission | "unsupported";
  * FCM 전용 SW를 직접 등록한다.
  *
  * SDK에 맡기면 쿼리스트링 없이 등록해버려서 SW가 Firebase config를 못 읽는다.
- * 그래서 여기서 등록하고 그 registration을 getToken에 넘긴다.
+ * 그래서 여기서 등록하고 그 registration을 register()에 넘긴다.
  */
 async function registerFcmServiceWorker() {
   const params = new URLSearchParams(firebaseConfig);
@@ -36,36 +35,50 @@ export function getPushPermission(): PushPermission {
 }
 
 /**
- * 권한을 받고 이 기기를 FCM에 등록한 뒤 FID를 돌려준다. 거부·미지원이면 null.
+ * 권한을 받고 이 기기를 FCM에 등록한다. 성공하면 true.
  *
- * getToken() 결과는 서버로 보내지 않지만 반드시 호출해야 한다. 이 호출이
- * 브라우저 PushSubscription을 만들고 기기를 FCM에 등록한다 — 없으면 서버가
- * 무엇을 보내든 배달될 곳이 없다. 서버 계약이 fid라 fid만 반환한다.
+ * FID는 여기서 돌려주지 않는다. register()는 등록을 시작만 하고 FID는
+ * onRegistered 콜백으로 온다 — 구독은 components/push-bridge.tsx가 맡는다.
+ * Installations의 getId()로 직접 뽑으면 안 된다. 그건 FCM 등록 성공 여부와
+ * 무관하게 값을 주기 때문에, 배달되지 않는 FID를 서버에 심게 된다.
  *
  * iOS Safari는 requestPermission()을 사용자 제스처 핸들러 안에서 호출해야
  * 프롬프트가 뜬다. 권한이 아직 "default"일 때는 반드시 클릭에서 호출할 것.
  */
 export async function requestPushRegistration() {
   const messaging = await getMessagingIfSupported();
-  if (!messaging) return null;
+  if (!messaging) {
+    // 실패 지점을 남긴다. 배포 빌드에서 알림이 안 오는 이유가 미지원 환경인지
+    // 권한 거부인지 구분이 안 되면 원인을 찾을 수가 없다.
+    console.warn(
+      "[push] 이 환경에서는 FCM을 쓸 수 없어요. HTTPS(또는 localhost)인지, iOS라면 홈 화면에 설치했는지 확인하세요.",
+    );
+    return false;
+  }
 
   const permission = await Notification.requestPermission();
-  if (permission !== "granted") return null;
+  if (permission !== "granted") {
+    console.warn(`[push] 알림 권한이 "${permission}" 상태예요.`);
+    return false;
+  }
 
   const serviceWorkerRegistration = await registerFcmServiceWorker();
-  await getToken(messaging, {
+  await register(messaging, {
     vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
     serviceWorkerRegistration,
   });
 
-  return getId(getInstallations(app));
+  return true;
 }
 
-/** 이 기기의 FCM 토큰을 무효화한다. 알림을 끌 때 서버 해제와 같이 부른다. */
-export async function revokePushToken() {
+/**
+ * 이 기기의 FID 등록을 지운다. 성공하면 onUnregistered가 발화한다.
+ * 로그아웃에서 서버 해제와 같이 부른다.
+ */
+export async function revokePushRegistration() {
   const messaging = await getMessagingIfSupported();
   if (!messaging) return;
-  await deleteToken(messaging);
+  await unregister(messaging);
 }
 
 /*

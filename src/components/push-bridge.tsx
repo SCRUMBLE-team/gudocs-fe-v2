@@ -1,21 +1,83 @@
 import { useEffect } from "react";
-import { onMessage } from "firebase/messaging";
+import { onMessage, onRegistered, onUnregistered } from "firebase/messaging";
 import { Text, VStack } from "@astryxdesign/core";
 import { useToast } from "@astryxdesign/core/Toast";
 import { getMessagingIfSupported } from "../lib/firebase";
+import {
+  clearStoredRegistrationId,
+  readStoredRegistrationId,
+  writeStoredRegistrationId,
+} from "../lib/push";
+import { getDeviceName } from "../utils/device";
+import { useRegisterPushMutation } from "../hooks/query/useRegisterPushMutation";
+import { useUnregisterPushMutation } from "../hooks/query/useUnregisterPushMutation";
+import { useUserQuery } from "../hooks/query/useUserQuery";
 
 /**
- * 푸시와 앱 화면을 잇는 리스너 두 개.
+ * 푸시와 앱을 잇는 리스너들.
  *
- * 1. 포그라운드 수신 → 인앱 토스트. 브라우저는 탭이 활성일 때 알림을 자동
+ * 1. FID 등록/해제 → 서버 동기화. register()는 FID를 반환하지 않고
+ *    onRegistered로 흘려보내므로, 서버에 올리는 건 여기서 한다. FCM이 FID를
+ *    회전시켜도 같은 경로로 들어와 자동으로 맞춰진다.
+ * 2. 포그라운드 수신 → 인앱 토스트. 브라우저는 탭이 활성일 때 알림을 자동
  *    표시하지 않아서, 이게 없으면 앱을 보고 있는 동안 온 알림은 사라진다.
- * 2. 알림 클릭 → 딥링크 이동. 서비스 워커가 보낸 PUSH_NAVIGATE를 받는다.
+ * 3. 알림 클릭 → 딥링크 이동. 서비스 워커가 보낸 PUSH_NAVIGATE를 받는다.
+ *
+ * App.tsx에 딱 한 번만 렌더한다. usePushNotification처럼 여러 화면에서 쓰면
+ * 구독이 중복돼 FID 하나에 POST가 여러 번 나간다.
  *
  * useToast가 ToastViewport 아래에서만 동작해서 렌더 트리에 들어가야 한다.
  * 화면에 그리는 건 없고 리스너만 붙이는 컴포넌트다.
  */
 function PushBridge() {
   const showToast = useToast();
+  const { data: user } = useUserQuery();
+  const { mutateAsync: registerPush } = useRegisterPushMutation();
+  const { mutateAsync: unregisterPush } = useUnregisterPushMutation();
+
+  useEffect(() => {
+    if (!user) return;
+
+    let unsubscribes: Array<() => void> = [];
+    let isCancelled = false;
+
+    void getMessagingIfSupported().then((messaging) => {
+      if (!messaging || isCancelled) return;
+
+      unsubscribes = [
+        onRegistered(messaging, (fid) => {
+          void registerPush({
+            fid,
+            platform: "WEB",
+            deviceName: getDeviceName(),
+          })
+            .then((registration) =>
+              writeStoredRegistrationId(user.id, registration.registrationId),
+            )
+            .catch((error: unknown) =>
+              console.warn("[push] 기기 등록에 실패했어요", error),
+            );
+        }),
+
+        onUnregistered(messaging, () => {
+          // registrationId는 서버가 준 값이라 FID로는 못 찾는다. 저장해둔 걸 쓴다.
+          const registrationId = readStoredRegistrationId(user.id);
+          if (registrationId === null) return;
+
+          void unregisterPush(registrationId)
+            .then(() => clearStoredRegistrationId())
+            .catch((error: unknown) =>
+              console.warn("[push] 기기 해제에 실패했어요", error),
+            );
+        }),
+      ];
+    });
+
+    return () => {
+      isCancelled = true;
+      unsubscribes.forEach((unsubscribe) => unsubscribe());
+    };
+  }, [user, registerPush, unregisterPush]);
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
