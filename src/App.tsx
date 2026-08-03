@@ -3,6 +3,8 @@ import PushBridge from "./components/push-bridge";
 import { Stack } from "./stackflow";
 
 function App() {
+  console.log(import.meta.env.VITE_FIREBASE_VAPID_KEY);
+
   return (
     // relative는 지우면 안 된다. AppScreen이 position: absolute + inset 0으로 깔려서
     // 이 엘리먼트가 containing block 노릇을 해야 스택이 480px 프레임 안에 갇힌다.
