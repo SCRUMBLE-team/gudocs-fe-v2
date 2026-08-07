@@ -11,5 +11,11 @@ export const PIE_PALETTE = [
   "light-dark(#008300, #008300)", // green
 ];
 
-/** top N 밖의 나머지 카테고리를 합산한 "그 외" 세그먼트 색. */
-export const REST_COLOR = "var(--color-text-tertiary)";
+/**
+ * top N 밖의 나머지 카테고리를 합산한 "그 외" 세그먼트 색.
+ *
+ * 팔레트의 마지막 초록을 그대로 쓴다. 도넛에서 여섯 번째 조각이 이 색이라
+ * 막대와 도넛의 "그 외"가 같은 색으로 보인다.
+ * (전에는 --color-text-tertiary였는데 이 토큰이 테마에 없어서 투명하게 렌더됐다.)
+ */
+export const REST_COLOR = PIE_PALETTE[5];
