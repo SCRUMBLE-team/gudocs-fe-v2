@@ -61,7 +61,7 @@ export const CATEGORY_SERVICES = {
   OTT: [
     { name: "유튜브 프리미엄", logo: logo("video/youtube.png") },
     { name: "넷플릭스", logo: logo("video/netflix.png") },
-    { name: "디지니플러스", logo: logo("video/disney_plus.png") },
+    { name: "디즈니플러스", logo: logo("video/disney_plus.png") },
     { name: "티빙", logo: logo("video/tving.png") },
     { name: "쿠팡플레이", logo: logo("video/coupang_play.png") },
     { name: "왓챠", logo: logo("video/watcha.png") },
