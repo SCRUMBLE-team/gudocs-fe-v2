@@ -193,30 +193,54 @@ function SubscriptionDetailContent({ id }: { id: string }) {
         <InfoRow label="등록일" value={formatDate(data.createdAt)} />
       </VStack>
 
-      <VStack
+      {/*
+        수정 진입로가 금액 옆 연필 아이콘뿐이라 눈에 잘 띄지 않았다.
+        삭제와 나란히 두어 둘 다 하단에서 바로 닿게 한다.
+        파괴적인 삭제가 오른쪽에 오도록 순서를 고정한다.
+      */}
+      <HStack
         className="sticky bottom-0 mt-auto bg-surface"
         paddingInline={4}
         paddingBlock={3}
+        gap={2}
       >
-        <Button
-          label="삭제"
-          variant="destructive"
-          size="lg"
-          onClick={() => setIsConfirmOpen(true)}
-        />
-      </VStack>
+        {/* Button은 폭 제어 prop이 없어 flex-1로 반씩 나눠 갖게 한다. */}
+        <VStack className="flex-1">
+          <Button
+            label="수정하기"
+            variant="secondary"
+            size="lg"
+            onClick={goEdit}
+          />
+        </VStack>
+        <VStack className="flex-1">
+          <Button
+            label="삭제하기"
+            variant="destructive"
+            size="lg"
+            onClick={() => setIsConfirmOpen(true)}
+          />
+        </VStack>
+      </HStack>
 
+      {/*
+        여기서의 삭제는 기록을 지우는 것이지 실제 서비스 해지가 아니다.
+        (서버도 softDelete라 결제와는 아무 상관이 없다.)
+        지웠다고 해지된 줄 알면 결제가 계속 나가므로, 서비스에서 먼저 해지했는지
+        확인부터 묻는다.
+      */}
       <BottomSheet
         isOpen={isConfirmOpen}
         onOpenChange={setIsConfirmOpen}
-        title="구독을 삭제할까요?"
+        title="구독을 해지하셨나요?"
       >
         <VStack paddingInline={4} paddingBlock={2} gap={3}>
           <Text type="body" color="secondary">
-            삭제하면 되돌릴 수 없어요.
+            목록에서 지워도 실제 서비스가 해지되지는 않아요. 아직이라면 해당
+            서비스에서 먼저 해지해주세요.
           </Text>
           <Button
-            label="삭제하기"
+            label="네, 삭제할게요"
             variant="destructive"
             size="lg"
             onClick={handleDelete}
