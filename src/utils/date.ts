@@ -60,10 +60,25 @@ export function fromISODate(value: string) {
   return new Date(year, month - 1, day);
 }
 
-/** ISO 날짜 문자열로부터 오늘까지 지난 일수(0 이상). 등록 경과일(D+N) 표시에 쓴다. */
-export function daysSince(isoDate: string): number {
-  const then = new Date(isoDate).getTime();
-  if (Number.isNaN(then)) return 0;
-  const diffDays = Math.floor((then - Date.now()) / 86_400_000);
+/**
+ * "YYYY-MM-DD"까지 남은 일수(0 이상). D-day 표시에 쓴다.
+ *
+ * 두 날짜를 각각 로컬 자정으로 맞춘 뒤 뺀다. new Date("2026-08-08")은 UTC
+ * 자정으로 파싱되는데 Date.now()는 로컬 시각이라, 그대로 빼면 시차만큼 결과가
+ * 밀린다. KST(+9)에서는 매일 09:00부터 하루가 끝날 때까지 하루씩 적게 나왔다.
+ * (내일 결제가 D-0으로 보이는 식)
+ */
+export function daysUntil(isoDate: string): number {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  if (!year || !month || !day) return 0;
+
+  const target = new Date(year, month - 1, day);
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // 자정끼리의 차이라 정확히 일수의 배수다. 서머타임으로 어긋나는 몇 시간은 round가 흡수한다.
+  const diffDays = Math.round(
+    (target.getTime() - startOfToday.getTime()) / 86_400_000,
+  );
   return Math.max(0, diffDays);
 }

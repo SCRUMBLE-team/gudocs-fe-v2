@@ -11,7 +11,7 @@ import EmptySubscription from "./empty-subscription";
 import { Text } from "@astryxdesign/core/Text";
 import ServiceLogo from "../../components/service-logo";
 import { formatWon } from "../../utils/format";
-import { daysSince } from "../../utils/date";
+import { daysUntil } from "../../utils/date";
 import { useFlow } from "@stackflow/react";
 
 /** 이 일수 이하로 남으면 D-day를 빨강으로 띄운다. */
@@ -82,7 +82,7 @@ function SubscriptionCard() {
                   </Text>
                 }
                 endContent={(() => {
-                  const daysLeft = daysSince(item.nextBillingDate);
+                  const daysLeft = daysUntil(item.nextBillingDate);
                   return (
                     <Badge
                       // 코앞으로 다가온 결제는 색을 바꿔 눈에 걸리게 한다.
