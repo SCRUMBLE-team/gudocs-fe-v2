@@ -15,8 +15,12 @@ export type CatalogService = {
   code: string;
   name: string;
   category: SubscribeCategory;
-  /** 종료된 서비스. 등록 선택지에서 빼되, 과거 데이터 표시용으로는 남는다. */
-  discontinued: boolean;
+  /**
+   * 신규 등록 대상으로 고를 수 있는지. false면 등록 선택지에서 뺀다.
+   * 종료된 서비스이거나(클로바X), 독립적으로 결제하는 구독 상품이 아닌 경우다(쿠팡이츠).
+   * 과거 영수증 OCR 인식용으로만 카탈로그에 남아 있다.
+   */
+  selectable: boolean;
   /** 원화 정가를 확인하지 못한 서비스는 빈 배열이다. */
   plans: CatalogPlan[];
 };

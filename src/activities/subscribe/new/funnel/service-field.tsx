@@ -17,7 +17,7 @@ function ServiceField() {
    * 지금 새로 가입할 수 있는 대상이 아니다.
    */
   const options = catalog.services.filter(
-    (item) => item.category === category && !item.discontinued,
+    (item) => item.category === category && item.selectable,
   );
 
   // 초기 서비스명이 목록에 없으면(OCR 인식 결과나 직접 입력한 값) 곧바로 자유
