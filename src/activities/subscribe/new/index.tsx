@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useFlow, type StaticActivityComponentType } from "@stackflow/react";
+import { useGoBack } from "../../../hooks/useGoBack";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { VStack } from "@astryxdesign/core/VStack";
 import { HStack } from "@astryxdesign/core/HStack";
@@ -21,7 +22,8 @@ import ServiceField from "./funnel/service-field";
 const SubscribeNewActivity: StaticActivityComponentType<"SubscribeNew"> = () => {
   const [category, setCategory] = useState<SubscribeCategory | null>(null);
   const [service, setService] = useState<string | null>(null);
-  const { push, pop } = useFlow();
+  const { push } = useFlow();
+  const goBack = useGoBack();
 
   const title = !category
     ? "구독하는 서비스의\n카테고리를 알려주세요"
@@ -51,7 +53,7 @@ const SubscribeNewActivity: StaticActivityComponentType<"SubscribeNew"> = () => 
               label="뒤로 가기"
               icon={<Icon icon="chevronLeft" />}
               variant="ghost"
-              onClick={() => pop()}
+              onClick={goBack}
             />
           </HStack>
 

@@ -1,5 +1,6 @@
 import { useRef, type ChangeEvent } from "react";
 import { useFlow, type StaticActivityComponentType } from "@stackflow/react";
+import { useGoBack } from "../../../../hooks/useGoBack";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { VStack } from "@astryxdesign/core/VStack";
 import { HStack } from "@astryxdesign/core/HStack";
@@ -43,7 +44,8 @@ function errorMessage(error: unknown) {
 const SubscribeNewStartActivity: StaticActivityComponentType<
   "SubscribeNewStart"
 > = () => {
-  const { push, pop } = useFlow();
+  const { push } = useFlow();
+  const goBack = useGoBack();
   const showToast = useToast();
   const inputRef = useRef<HTMLInputElement>(null);
   const { mutate, isPending } = useScanSubscriptionImageMutation();
@@ -94,7 +96,7 @@ const SubscribeNewStartActivity: StaticActivityComponentType<
             label="뒤로 가기"
             icon={<Icon icon="chevronLeft" />}
             variant="ghost"
-            onClick={() => pop()}
+            onClick={goBack}
           />
         </HStack>
 

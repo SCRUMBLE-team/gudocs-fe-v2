@@ -87,9 +87,21 @@ function TabLayout({ children }: { children: ReactNode }) {
           justify="between"
           align="center"
         >
-          <Text className="text-2xl" weight="bold" color="accent">
-            Gudocs
-          </Text>
+          {/*
+            로고는 홈으로 가는 버튼이다. 이동은 탭 이동과 같은 규칙을 타야
+            스택이 어긋나지 않으므로 goTab을 그대로 쓴다.
+            (홈에서 누르면 goTab이 먼저 걸러내 아무 일도 일어나지 않는다.)
+          */}
+          <HStack
+            as="button"
+            aria-label="홈으로 이동"
+            onClick={() => goTab(ROOT_TAB)}
+            className="transition-transform active:scale-95"
+          >
+            <Text className="text-2xl" weight="bold" color="accent">
+              Gudocs
+            </Text>
+          </HStack>
           <IconButton
             label={isEnabled ? "알림 끄기" : "알림 켜기"}
             icon={

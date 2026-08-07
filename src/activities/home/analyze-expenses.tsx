@@ -2,7 +2,7 @@ import { Button, Card, VStack, HStack, Text } from "@astryxdesign/core";
 import { ResponsiveContainer, PieChart, Pie, Tooltip } from "recharts";
 import { useFlow } from "@stackflow/react";
 import { CATEGORY_META } from "../../constants/category";
-import { PIE_PALETTE } from "../../constants/category-palette";
+import { PIE_PALETTE, REST_COLOR } from "../../constants/category-palette";
 import { useCategoryExpensesQuery } from "../../hooks/query/useCategoryExpensesQuery";
 import { getBaseYearMonth } from "../../utils/date";
 import { formatWon } from "../../utils/format";
@@ -48,9 +48,10 @@ function AnalyzeExpenses() {
   }
 
   // 팔레트 색을 각 조각의 fill로 넣어 Pie와 범례가 같은 색을 공유하게 한다.
+  // "그 외"만 고정색을 써서 카테고리 수가 몇 개든 소비 분석 화면의 막대와 색이 맞는다.
   const slices: Slice[] = rawSlices.map((s, i) => ({
     ...s,
-    fill: PIE_PALETTE[i % PIE_PALETTE.length],
+    fill: s.key === "ETC_REST" ? REST_COLOR : PIE_PALETTE[i % PIE_PALETTE.length],
   }));
 
   const toPercent = (amount: number) =>
@@ -90,8 +91,12 @@ function AnalyzeExpenses() {
                   paddingAngle={2}
                   stroke="none"
                 />
+                {/* 금액만으로는 이 조각이 전체에서 얼마나 큰지 알 수 없어 비율을 같이 붙인다. */}
                 <Tooltip
-                  formatter={(value, name) => [formatWon(Number(value)), name]}
+                  formatter={(value, name) => [
+                    `${formatWon(Number(value))} · ${toPercent(Number(value))}%`,
+                    name,
+                  ]}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -121,7 +126,8 @@ function AnalyzeExpenses() {
             <Button
               label="소비 분석 살펴보기"
               variant="primary"
-              className="p-6"
+              // 범례 마지막 줄과 붙어 보여서 카드 gap(12px)에 2px만 더 띄운다.
+              className="p-6 mt-0.5"
               onClick={() => push("Analyze", {})}
             />
           </>

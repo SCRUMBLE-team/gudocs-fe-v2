@@ -4,13 +4,17 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { useFlow } from "@stackflow/react";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { Bar, BarChart, LabelList, ResponsiveContainer, XAxis } from "recharts";
 import EmptyState from "../../components/empty-state";
-import ChangeText from "../../components/change-text";
+import SpendingComparison from "../../components/spending-comparison";
 import ServiceLogo from "../../components/service-logo";
 import type { BillingCycle } from "../../types/subscribe";
+import { addMonths, compareYearMonth, type YearMonth } from "../../utils/date";
 import { formatWon } from "../../utils/format";
+import ChartCoachMark from "./chart-coach-mark";
+import MonthWindow from "./month-window";
+import { useCoachMark } from "./use-coach-mark";
 
 export type ExpenseRow = {
   subscriptionId: number;
@@ -32,18 +36,25 @@ export type ExpenseRow = {
  */
 export type ExpensesViewModel = {
   totalAmount: number;
-  /** 비교할 이전 달 데이터가 없으면 null. 문구를 통째로 생략한다. */
-  changeAmount: number | null;
+  /** 실제 현재 달의 지출. 비교 문구는 언제나 이 값을 기준으로 삼는다. */
+  currentAmount: number;
   monthlyAmount: number;
   yearlyAmount: number;
   trend: { year: number; month: number; totalAmount: number }[];
   rows: ExpenseRow[];
+  /** 구독을 처음 등록한 달. 기간을 과거로 옮길 수 있는 하한이다. */
+  earliestMonth: YearMonth | null;
 };
 
 type Props = {
   model: ExpensesViewModel;
   selected: { year: number; month: number };
   onSelectMonth: (period: { year: number; month: number }) => void;
+  /** 차트가 보여주는 6개월 창의 마지막 달. */
+  windowEnd: YearMonth;
+  /** 실제 현재 달. 창을 미래로 넘기지 못하게 막는 상한이자 비교의 기준이다. */
+  current: YearMonth;
+  onWindowEndChange: (period: YearMonth) => void;
   /** 연간 구독분에 붙일 이름. 기준에 따라 "연간 환산" / "연간 결제"로 갈린다. */
   yearlyLabel: string;
   /** 실제 청구 기준에서 연간 결제가 없는 달에 띄울 안내. */
@@ -268,33 +279,130 @@ function ExpenseList({ rows, month }: { rows: ExpenseRow[]; month: number }) {
   );
 }
 
+/** 스와이프로 인정할 최소 가로 이동 거리(px). 세로 스크롤과 헷갈리지 않게 둔다. */
+const SWIPE_THRESHOLD = 48;
+
 function ExpensesView({
   model,
   selected,
   onSelectMonth,
+  windowEnd,
+  current,
+  onWindowEndChange,
   yearlyLabel,
   emptyYearlyHint,
 }: Props) {
-  const { totalAmount, changeAmount, monthlyAmount, yearlyAmount, trend, rows } =
-    model;
+  const {
+    totalAmount,
+    currentAmount,
+    monthlyAmount,
+    yearlyAmount,
+    trend,
+    rows,
+    earliestMonth,
+  } = model;
+  const coachMark = useCoachMark();
+
+  const isCurrentSelected =
+    selected.year === current.year && selected.month === current.month;
+
+  // 이번 달을 보고 있으면 견줄 대상이 자기 자신이라 의미가 없다.
+  // 홈 카드와 같게 지난달을 기본 비교 대상으로 삼는다.
+  const comparedPeriod = isCurrentSelected ? addMonths(current, -1) : selected;
+  const comparedEntry = trend.find(
+    ({ year, month }) =>
+      year === comparedPeriod.year && month === comparedPeriod.month,
+  );
+
+  // 막대를 누르면 안내를 본 것으로 친다.
+  const selectMonth = (period: { year: number; month: number }) => {
+    coachMark.dismiss();
+    onSelectMonth(period);
+  };
+
+  // 가로 스와이프로도 기간을 넘길 수 있게 한다. 화살표만으로는 모바일에서 답답하다.
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const handleTouchEnd = (endX: number, endY: number) => {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start) return;
+
+    const deltaX = endX - start.x;
+    const deltaY = endY - start.y;
+    // 세로로 긁는 중에 손가락이 옆으로 흔들리는 정도로는 기간이 넘어가면 안 된다.
+    // 가로 이동이 임계값을 넘으면서 세로보다 커야 스와이프로 친다.
+    if (Math.abs(deltaX) < SWIPE_THRESHOLD) return;
+    if (Math.abs(deltaX) <= Math.abs(deltaY)) return;
+
+    // 왼쪽으로 밀면 다음(미래) 기간. 현재 달을 넘어서지는 않는다.
+    if (deltaX < 0) {
+      if (compareYearMonth(windowEnd, current) < 0) {
+        onWindowEndChange(addMonths(windowEnd, 1));
+      }
+      return;
+    }
+
+    // 오른쪽으로 밀면 이전 기간. 첫 구독 등록 달보다 앞으로는 못 간다.
+    if (earliestMonth && compareYearMonth(windowEnd, earliestMonth) <= 0) return;
+    onWindowEndChange(addMonths(windowEnd, -1));
+  };
 
   return (
     <VStack padding={4} gap={6}>
       <VStack gap={1}>
-        <Text type="supporting" color="secondary">
+        {/* 지금 보고 있는 달을 또렷하게 — 막대를 옮겨 다니면 여기가 유일한 단서다. */}
+        <Text className="text-lg" weight="bold">
           {selected.month}월 지출
         </Text>
         <Text type="display-3" weight="bold" hasTabularNumbers>
           {formatWon(totalAmount)}
         </Text>
-        {changeAmount != null && <ChangeText changeAmount={changeAmount} />}
+        <SpendingComparison
+          currentAmount={currentAmount}
+          compared={
+            comparedEntry
+              ? {
+                  label: isCurrentSelected
+                    ? "지난달"
+                    : `${selected.month}월`,
+                  amount: comparedEntry.totalAmount,
+                }
+              : null
+          }
+        />
       </VStack>
 
-      <TrendChart
-        trend={trend}
-        selected={selected}
-        onSelectMonth={onSelectMonth}
-      />
+      <VStack gap={2}>
+        <MonthWindow
+          windowEnd={windowEnd}
+          current={current}
+          earliest={earliestMonth}
+          onWindowEndChange={onWindowEndChange}
+        />
+
+        <VStack
+          className="relative"
+          onTouchStart={(event) => {
+            const touch = event.touches[0];
+            touchStart.current = touch
+              ? { x: touch.clientX, y: touch.clientY }
+              : null;
+          }}
+          onTouchEnd={(event) => {
+            const touch = event.changedTouches[0];
+            if (touch) handleTouchEnd(touch.clientX, touch.clientY);
+          }}
+        >
+          {coachMark.isVisible && (
+            <ChartCoachMark onDismiss={coachMark.dismiss} />
+          )}
+          <TrendChart
+            trend={trend}
+            selected={selected}
+            onSelectMonth={selectMonth}
+          />
+        </VStack>
+      </VStack>
 
       {rows.length === 0 ? (
         <VStack paddingBlock={8}>

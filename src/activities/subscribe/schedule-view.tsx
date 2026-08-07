@@ -56,7 +56,12 @@ function ScheduleView() {
         hasOutsideDays={false}
         className="w-full"
       />
-      <MonthlyExpensePanel subscriptions={visibleSubscriptions} month={month} />
+      {/* 결제 완료/예정을 가르려면 일(day)만으로는 부족해 연도까지 넘긴다. */}
+      <MonthlyExpensePanel
+        subscriptions={visibleSubscriptions}
+        year={year}
+        month={month}
+      />
     </VStack>
   );
 }

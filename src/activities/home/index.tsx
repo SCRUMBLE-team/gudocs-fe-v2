@@ -6,6 +6,7 @@ import TabLayout from "../layout";
 import SpendingSummary from "./spending-summary";
 import SubscriptionCard from "./subscription-card";
 import AnalyzeExpenses from "./analyze-expenses";
+import SavingsInvite from "./savings-invite";
 
 const HomeActivity: StaticActivityComponentType<"Home"> = () => {
   return (
@@ -21,6 +22,9 @@ const HomeActivity: StaticActivityComponentType<"Home"> = () => {
           </Suspense>
           <Suspense>
             <AnalyzeExpenses />
+          </Suspense>
+          <Suspense>
+            <SavingsInvite />
           </Suspense>
         </VStack>
       </TabLayout>
