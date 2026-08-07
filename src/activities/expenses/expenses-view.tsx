@@ -321,17 +321,21 @@ function ExpensesView({
   };
 
   // 가로 스와이프로도 기간을 넘길 수 있게 한다. 화살표만으로는 모바일에서 답답하다.
-  const touchStartX = useRef<number | null>(null);
-  const handleTouchEnd = (endX: number) => {
-    const startX = touchStartX.current;
-    touchStartX.current = null;
-    if (startX == null) return;
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const handleTouchEnd = (endX: number, endY: number) => {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start) return;
 
-    const delta = endX - startX;
-    if (Math.abs(delta) < SWIPE_THRESHOLD) return;
+    const deltaX = endX - start.x;
+    const deltaY = endY - start.y;
+    // 세로로 긁는 중에 손가락이 옆으로 흔들리는 정도로는 기간이 넘어가면 안 된다.
+    // 가로 이동이 임계값을 넘으면서 세로보다 커야 스와이프로 친다.
+    if (Math.abs(deltaX) < SWIPE_THRESHOLD) return;
+    if (Math.abs(deltaX) <= Math.abs(deltaY)) return;
 
     // 왼쪽으로 밀면 다음(미래) 기간. 현재 달을 넘어서지는 않는다.
-    if (delta < 0) {
+    if (deltaX < 0) {
       if (compareYearMonth(windowEnd, current) < 0) {
         onWindowEndChange(addMonths(windowEnd, 1));
       }
@@ -379,11 +383,15 @@ function ExpensesView({
         <VStack
           className="relative"
           onTouchStart={(event) => {
-            touchStartX.current = event.touches[0]?.clientX ?? null;
+            const touch = event.touches[0];
+            touchStart.current = touch
+              ? { x: touch.clientX, y: touch.clientY }
+              : null;
           }}
-          onTouchEnd={(event) =>
-            handleTouchEnd(event.changedTouches[0]?.clientX ?? 0)
-          }
+          onTouchEnd={(event) => {
+            const touch = event.changedTouches[0];
+            if (touch) handleTouchEnd(touch.clientX, touch.clientY);
+          }}
         >
           {coachMark.isVisible && (
             <ChartCoachMark onDismiss={coachMark.dismiss} />
