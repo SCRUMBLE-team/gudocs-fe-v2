@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Grid } from "@astryxdesign/core/Grid";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { IconButton } from "@astryxdesign/core/IconButton";
@@ -34,6 +35,8 @@ function MonthPicker({
   value,
   current,
   earliest,
+  year,
+  onYearChange,
   onPick,
 }: {
   isOpen: boolean;
@@ -41,21 +44,19 @@ function MonthPicker({
   value: YearMonth;
   current: YearMonth;
   earliest: YearMonth | null;
+  /**
+   * 시트 안에서 넘기는 연도. 실제 선택은 월을 눌러야 확정된다.
+   *
+   * 이 상태를 시트 안에 두면 닫을 때 아직 갱신되지 않은 value.year로 되돌아가서,
+   * 다른 해의 월을 고른 뒤 다시 열면 이전 연도가 보였다. 여는 쪽에서 초기화하도록
+   * 부모로 올렸다. (effect로 맞추는 방법은 이 저장소 린트 규칙에 걸린다)
+   */
+  year: number;
+  onYearChange: (year: number) => void;
   onPick: (period: YearMonth) => void;
 }) {
-  // 시트 안에서 넘기는 연도. 실제 선택은 월을 눌러야 확정된다.
-  const [year, setYear] = useState(value.year);
-
   return (
-    <BottomSheet
-      isOpen={isOpen}
-      onOpenChange={(open) => {
-        // 다시 열 때 보고 있던 달의 연도에서 시작하도록 되돌린다.
-        if (!open) setYear(value.year);
-        onOpenChange(open);
-      }}
-      title="기간 선택"
-    >
+    <BottomSheet isOpen={isOpen} onOpenChange={onOpenChange} title="기간 선택">
       <VStack paddingInline={4} paddingBlock={2} gap={3}>
         <HStack justify="between" align="center">
           <IconButton
@@ -63,7 +64,7 @@ function MonthPicker({
             icon={<Icon icon="chevronLeft" />}
             variant="ghost"
             isDisabled={earliest != null && year <= earliest.year}
-            onClick={() => setYear((prev) => prev - 1)}
+            onClick={() => onYearChange(year - 1)}
           />
           <Text type="large" weight="bold">
             {year}년
@@ -73,12 +74,12 @@ function MonthPicker({
             icon={<Icon icon="chevronRight" />}
             variant="ghost"
             isDisabled={year >= current.year}
-            onClick={() => setYear((prev) => prev + 1)}
+            onClick={() => onYearChange(year + 1)}
           />
         </HStack>
 
         {/* 4열 x 3행. 아직 오지 않은 달은 데이터가 없으므로 막는다. */}
-        <div className="grid grid-cols-4 gap-2">
+        <Grid columns={4} gap={2}>
           {MONTHS.map((month) => {
             const period = { year, month };
             // 앞뒤로 데이터가 없는 달은 고를 수 없다.
@@ -121,7 +122,7 @@ function MonthPicker({
               </VStack>
             );
           })}
-        </div>
+        </Grid>
       </VStack>
     </BottomSheet>
   );
@@ -140,6 +141,13 @@ function MonthWindow({
   onWindowEndChange,
 }: Props) {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
+  // 시트가 넘겨 보고 있는 연도. 열 때마다 지금 보고 있는 기간의 연도로 맞춘다.
+  const [pickerYear, setPickerYear] = useState(windowEnd.year);
+
+  const openPicker = () => {
+    setPickerYear(windowEnd.year);
+    setIsPickerOpen(true);
+  };
 
   const windowStart = addMonths(windowEnd, -(WINDOW_MONTHS - 1));
   // 미래는 데이터가 없으니 현재 달까지만 앞으로 갈 수 있다.
@@ -165,7 +173,7 @@ function MonthWindow({
           paddingInline={2}
           paddingBlock={1}
           aria-label={`기간 선택, 현재 ${formatYearMonth(windowStart)}부터 ${formatYearMonth(windowEnd)}까지`}
-          onClick={() => setIsPickerOpen(true)}
+          onClick={openPicker}
           className="rounded-lg transition-transform active:scale-95"
         >
           <Text type="body" weight="semibold" hasTabularNumbers>
@@ -189,6 +197,8 @@ function MonthWindow({
         value={windowEnd}
         current={current}
         earliest={earliest}
+        year={pickerYear}
+        onYearChange={setPickerYear}
         onPick={onWindowEndChange}
       />
     </>
