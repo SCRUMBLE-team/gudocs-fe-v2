@@ -1,5 +1,6 @@
 import { Suspense, useState, useTransition } from "react";
-import { useFlow, type StaticActivityComponentType } from "@stackflow/react";
+import type { StaticActivityComponentType } from "@stackflow/react";
+import { useGoBack } from "../../hooks/useGoBack";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { VStack } from "@astryxdesign/core/VStack";
 import { HStack } from "@astryxdesign/core/HStack";
@@ -22,7 +23,7 @@ function shiftMonth(
 }
 
 const AnalyzeActivity: StaticActivityComponentType<"Analyze"> = () => {
-  const { pop } = useFlow();
+  const goBack = useGoBack();
   const [period, setPeriod] = useState(getBaseYearMonth());
   const [, startTransition] = useTransition();
 
@@ -37,13 +38,13 @@ const AnalyzeActivity: StaticActivityComponentType<"Analyze"> = () => {
             label="뒤로 가기"
             icon={<Icon icon="chevronLeft" />}
             variant="ghost"
-            onClick={() => pop()}
+            onClick={goBack}
           />
           <Text type="body" weight="bold" className="flex-1 text-center">
             소비 분석
           </Text>
-          {/* 좌측 뒤로가기 버튼과 균형을 맞춰 타이틀을 가운데 정렬하기 위한 스페이서 */}
-          <VStack className="w-10 shrink-0" />
+          {/* 좌측 뒤로가기 버튼과 같은 폭(32px)을 차지해 타이틀을 정확히 가운데 둔다. */}
+          <VStack className="w-8 shrink-0" />
         </HStack>
 
         {/* 월 이동 바 */}
