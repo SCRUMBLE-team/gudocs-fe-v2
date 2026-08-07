@@ -13,7 +13,8 @@ import type { SubscribeContextValue } from "./subscribe-context";
 export function toSubscribePayload(
   value: SubscribeContextValue,
 ): CreateSubscribePayload | null {
-  const { category, service, billingCycle, price, paymentDate } = value;
+  const { category, service, serviceCode, billingCycle, price, paymentDate } =
+    value;
 
   if (!category || !service || !billingCycle || price == null || !paymentDate) {
     return null;
@@ -22,6 +23,8 @@ export function toSubscribePayload(
     category,
     // 퍼널 필드는 service, 서버는 serviceName. 어차피 담는 값은 서비스 '이름'이다.
     serviceName: service,
+    // 카탈로그에서 고르지 않았으면 null. 서버 컬럼도 nullable이다.
+    serviceCode: serviceCode ?? null,
     price,
     billingCycle,
     firstBillingDate: toISODate(paymentDate),

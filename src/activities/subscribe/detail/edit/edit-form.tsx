@@ -25,6 +25,9 @@ function EditForm({ id }: { id: string }) {
   const { mutate, isPending } = useEditSubscriptionMutation();
   const [category, setCategory] = useState(data.category);
   const [service, setService] = useState<string | null>(data.serviceName);
+  const [serviceCode, setServiceCode] = useState<string | null>(
+    data.serviceCode,
+  );
   const [billingCycle, setBillingCycle] = useState(data.billingCycle);
   const [price, setPrice] = useState<number | null>(data.price);
   const [paymentDate, setPaymentDate] = useState<Date | null>(
@@ -35,7 +38,11 @@ function EditForm({ id }: { id: string }) {
     category,
     onChangeCategory: setCategory,
     service,
-    onChangeService: setService,
+    serviceCode,
+    onChangeService: (value, code) => {
+      setService(value);
+      setServiceCode(code ?? null);
+    },
     billingCycle,
     onChangeBillingCycle: setBillingCycle,
     price,

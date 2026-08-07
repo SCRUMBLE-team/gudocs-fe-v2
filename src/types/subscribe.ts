@@ -17,6 +17,8 @@ export type SubscribeStatus = "ACTIVE" | "PAUSED";
 export type CreateSubscribePayload = {
   category: SubscribeCategory;
   serviceName: string;
+  /** 카탈로그 서비스의 불변 code. 직접 입력한 서비스는 null이다. */
+  serviceCode: string | null;
   price: number;
   billingCycle: BillingCycle;
   /** 최근(최초) 결제일. "YYYY-MM-DD" — ex) "2026-07-15" */
@@ -30,6 +32,8 @@ export type CreateSubscribePayload = {
 export interface SubscriptionDetail {
   id: number;
   serviceName: string;
+  /** 카탈로그 code. 로고 조회 키. 직접 입력한 서비스는 null이다. */
+  serviceCode: string | null;
   category: SubscribeCategory;
   price: number;
   billingCycle: BillingCycle;

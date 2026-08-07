@@ -49,6 +49,8 @@ const SubscribeNewPayActivity: StaticActivityComponentType<
     category: params.category,
     onChangeCategory: () => {},
     service: params.service,
+    // 이 화면에는 ServiceField가 없다. code는 확정 화면에서 카탈로그로 되찾는다.
+    serviceCode: null,
     onChangeService: () => {},
     billingCycle,
     onChangeBillingCycle: setBillingCycle,
