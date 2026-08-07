@@ -224,7 +224,6 @@ function SavingsContent() {
                     />
                     <ServiceLogo
                       name={row.serviceName}
-                      fallbackName={row.serviceName}
                     />
                   </HStack>
                 }

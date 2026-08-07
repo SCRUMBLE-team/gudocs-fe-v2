@@ -69,7 +69,6 @@ function ListView() {
                     startContent={
                       <ServiceLogo
                         name={item.serviceName}
-                        fallbackName={item.serviceName}
                       />
                     }
                     label={

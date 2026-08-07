@@ -66,7 +66,7 @@ function SubscriptionCard() {
                 startContent={
                   <ServiceLogo
                     name={item.serviceName}
-                    fallbackName={item.serviceName}
+                    code={item.serviceCode}
                   />
                 }
                 className="p-0 py-1"
