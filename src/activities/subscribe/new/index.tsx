@@ -77,7 +77,14 @@ const SubscribeNewActivity: StaticActivityComponentType<"SubscribeNew"> = () => 
             {category && service && (
               <FixedBottomCTA
                 label="다음으로"
-                onClick={() => push("SubscribeNewPay", { category, service })}
+                onClick={() =>
+                  push("SubscribeNewPay", {
+                    category,
+                    service,
+                    // 직접 입력한 서비스는 code 가 없다. undefined 면 URL 에 실리지 않는다.
+                    ...(serviceCode ? { serviceCode } : {}),
+                  })
+                }
               />
             )}
           </VStack>

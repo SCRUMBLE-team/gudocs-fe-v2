@@ -6,7 +6,7 @@ import { useCatalogQuery } from "../../../../hooks/query/useCatalogQuery";
 import { useSubscribeContext } from "../subscribe-context";
 
 function ServiceField() {
-  const { category, service, onChangeService } =
+  const { category, service, serviceCode, onChangeService } =
     useSubscribeContext("ServiceField");
   const { data: catalog } = useCatalogQuery();
 
@@ -24,7 +24,7 @@ function ServiceField() {
   // 입력으로 연다. 목록형으로 두면 SheetSelectField가 짝을 못 찾아 값이 state에는
   // 있는데 화면에는 placeholder가 보인다.
   const [custom, setCustom] = useState(
-    () => !!service && !options.some((item) => item.name === service),
+    () => !!service && !options.some((item) => item.code === serviceCode),
   );
   const [prevCategory, setPrevCategory] = useState(category);
 
@@ -33,6 +33,13 @@ function ServiceField() {
     setPrevCategory(category);
     setCustom(category === "ETC");
     onChangeService("", null);
+  }
+
+  // 자유 입력으로 열렸는데 code가 남아 있으면 비운다.
+  // OCR이 신규 등록 불가 서비스(쿠팡이츠 등)를 인식하면 목록에 없어 자유 입력이 되는데,
+  // 사용자가 이름을 손대지 않고 제출하면 그 code가 그대로 실려 서버가 400으로 막는다.
+  if (custom && serviceCode && !options.some((item) => item.code === serviceCode)) {
+    onChangeService(service ?? "", null);
   }
 
   if (!category) {
@@ -59,7 +66,9 @@ function ServiceField() {
       options={options.map((item) => {
         const logo = getServiceLogo(item.code);
         return {
-          value: item.name,
+          // 선택값은 표시명이 아니라 code다. 이름은 바뀔 수 있고 겹칠 수도 있어서
+          // 이름으로 되찾으면 엉뚱한 서비스의 code가 실릴 수 있다.
+          value: item.code,
           label: item.name,
           icon: logo ? (
             <img
@@ -70,13 +79,11 @@ function ServiceField() {
           ) : undefined,
         };
       })}
-      value={service}
-      onChange={(name) =>
-        onChangeService(
-          name,
-          options.find((item) => item.name === name)?.code ?? null,
-        )
-      }
+      value={serviceCode}
+      onChange={(code) => {
+        const selected = options.find((item) => item.code === code);
+        onChangeService(selected?.name ?? "", selected?.code ?? null);
+      }}
       footerAction={{
         label: "직접 입력",
         onSelect: () => {
