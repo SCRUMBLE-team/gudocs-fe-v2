@@ -44,7 +44,13 @@ declare module "@stackflow/config" {
     Savings: Record<string, never>;
     SubscribeNewStart: Record<string, never>;
     SubscribeNew: Record<string, never>;
-    SubscribeNewPay: { category: SubscribeCategory; service: string };
+    // serviceCode 는 카탈로그에서 고른 경우에만 있다(직접 입력이면 없음).
+    // 제출 시 쓰는 불변 식별자라, 표시명으로 되찾지 않고 그대로 나른다.
+    SubscribeNewPay: {
+      category: SubscribeCategory;
+      service: string;
+      serviceCode?: string;
+    };
     // historySync가 URL에 실었다 새로고침 때 문자열로 복원하므로 price도 string이다.
     // 파싱·검증은 받는 쪽 toSubscribeDraft가 맡는다.
     SubscribeNewConfirm: SubscribeConfirmParams;

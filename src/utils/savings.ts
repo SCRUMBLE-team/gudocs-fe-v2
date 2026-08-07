@@ -6,6 +6,8 @@ import { isListed, isPaused } from "./expenses";
 export type SavingsRow = {
   subscriptionId: number;
   serviceName: string;
+  /** 카탈로그 code. 로고 조회 키. 직접 입력한 서비스는 null이다. */
+  serviceCode: string | null;
   category: SubscribeCategory;
   categoryName: string;
   /** 월 환산 금액. 연간 구독도 12로 나눈 값이라 한 줄에서 바로 비교된다. */
@@ -37,6 +39,7 @@ export function buildSavingsRows(
   return subscriptions.filter(isListed).map((item) => ({
     subscriptionId: item.subscriptionId,
     serviceName: item.serviceName,
+    serviceCode: item.serviceCode,
     category: item.category,
     categoryName: item.categoryName,
     monthlyAmount: item.appliedMonthlyAmount,

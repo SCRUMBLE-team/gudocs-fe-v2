@@ -22,6 +22,7 @@ import ServiceField from "./funnel/service-field";
 const SubscribeNewActivity: StaticActivityComponentType<"SubscribeNew"> = () => {
   const [category, setCategory] = useState<SubscribeCategory | null>(null);
   const [service, setService] = useState<string | null>(null);
+  const [serviceCode, setServiceCode] = useState<string | null>(null);
   const { push } = useFlow();
   const goBack = useGoBack();
 
@@ -37,7 +38,11 @@ const SubscribeNewActivity: StaticActivityComponentType<"SubscribeNew"> = () => 
         category,
         onChangeCategory: setCategory,
         service,
-        onChangeService: setService,
+        serviceCode,
+        onChangeService: (value, code) => {
+          setService(value);
+          setServiceCode(code ?? null);
+        },
         billingCycle: null,
         onChangeBillingCycle: () => {},
         price: null,
@@ -72,7 +77,14 @@ const SubscribeNewActivity: StaticActivityComponentType<"SubscribeNew"> = () => 
             {category && service && (
               <FixedBottomCTA
                 label="다음으로"
-                onClick={() => push("SubscribeNewPay", { category, service })}
+                onClick={() =>
+                  push("SubscribeNewPay", {
+                    category,
+                    service,
+                    // 직접 입력한 서비스는 code 가 없다. undefined 면 URL 에 실리지 않는다.
+                    ...(serviceCode ? { serviceCode } : {}),
+                  })
+                }
               />
             )}
           </VStack>

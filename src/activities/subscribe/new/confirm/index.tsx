@@ -41,6 +41,7 @@ const SubscribeNewConfirmActivity: StaticActivityComponentType<
 
   const [category, setCategory] = useState(draft.category);
   const [service, setService] = useState(draft.service);
+  const [serviceCode, setServiceCode] = useState(draft.serviceCode);
   const [billingCycle, setBillingCycle] = useState(draft.billingCycle);
   const [price, setPrice] = useState(draft.price);
   const [paymentDate, setPaymentDate] = useState(draft.paymentDate);
@@ -54,7 +55,13 @@ const SubscribeNewConfirmActivity: StaticActivityComponentType<
     category,
     onChangeCategory: setCategory,
     service,
-    onChangeService: setService,
+    // OCR이 인식한 code를 그대로 쓴다. 사용자가 서비스를 바꾸면 고른 항목의
+    // code로 교체한다 — 이름으로 되찾지 않는다.
+    serviceCode,
+    onChangeService: (value, code) => {
+      setService(value);
+      setServiceCode(code ?? null);
+    },
     billingCycle,
     onChangeBillingCycle: setBillingCycle,
     price,

@@ -49,6 +49,9 @@ const SubscribeNewPayActivity: StaticActivityComponentType<
     category: params.category,
     onChangeCategory: () => {},
     service: params.service,
+    // 1단계에서 고른 code 를 그대로 받는다. 이름으로 되찾으면 표시명이 겹치거나
+    // 바뀌었을 때 엉뚱한 서비스의 code 가 실린다.
+    serviceCode: params.serviceCode ?? null,
     onChangeService: () => {},
     billingCycle,
     onChangeBillingCycle: setBillingCycle,

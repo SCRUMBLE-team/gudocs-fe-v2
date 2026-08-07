@@ -2,10 +2,13 @@ import { Avatar } from "@astryxdesign/core/Avatar";
 import { getServiceLogo } from "../constants/category";
 
 export type ServiceLogoProps = {
-  /** 로고를 조회할 서비스명. Avatar 이니셜에도 쓰인다. */
+  /** Avatar 이니셜에 쓰는 표시명. 로고를 찾는 키는 아니다. */
   name: string;
-  /** name으로 로고를 못 찾을 때 대신 조회할 이름 (예: 서버의 service 필드) */
-  fallbackName?: string;
+  /**
+   * 카탈로그 code. 로고를 찾는 유일한 키다.
+   * 직접 입력한 서비스는 null이라 로고가 없고, 이니셜 Avatar로 대체된다.
+   */
+  code: string | null;
   /** 정사각형 한 변의 px. 기본 36. */
   size?: number;
 };
@@ -23,8 +26,8 @@ function avatarSize(px: number) {
  * 서비스 로고 이미지. 등록된 로고가 없으면 이니셜 Avatar로 대체한다.
  * 구독 목록·상세·소비 분석 등 서비스 아이콘이 필요한 곳에서 공용으로 쓴다.
  */
-function ServiceLogo({ name, fallbackName, size = 36 }: ServiceLogoProps) {
-  const logo = getServiceLogo(name) ?? getServiceLogo(fallbackName);
+function ServiceLogo({ name, code, size = 36 }: ServiceLogoProps) {
+  const logo = getServiceLogo(code);
 
   if (logo) {
     return (

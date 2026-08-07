@@ -12,7 +12,12 @@ export type SubscribeContextValue = {
   category: SubscribeCategory | null;
   onChangeCategory: (value: SubscribeCategory) => void;
   service: string | null;
-  onChangeService: (value: string) => void;
+  /**
+   * 카탈로그에서 고른 서비스의 불변 code. 직접 입력한 서비스는 null이다.
+   * 이름과 함께 서버로 보내 로고 조회의 키가 된다.
+   */
+  serviceCode: string | null;
+  onChangeService: (value: string, code?: string | null) => void;
   billingCycle: BillingCycle | null;
   onChangeBillingCycle: (value: BillingCycle) => void;
   price: number | null;

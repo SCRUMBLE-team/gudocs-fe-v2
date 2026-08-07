@@ -16,6 +16,7 @@ import { fromISODate, toISODate } from "../../../utils/date";
 type SubscribeDraftInput = {
   category?: string | null;
   serviceName?: string | null;
+  serviceCode?: string | null;
   price?: string | number | null;
   billingCycle?: string | null;
   firstBillingDate?: string | null;
@@ -25,6 +26,7 @@ type SubscribeDraftInput = {
 export type SubscribeDraft = {
   category: SubscribeCategory | null;
   service: string | null;
+  serviceCode: string | null;
   price: number | null;
   billingCycle: BillingCycle | null;
   paymentDate: Date | null;
@@ -34,6 +36,7 @@ export type SubscribeDraft = {
 export type SubscribeConfirmParams = {
   category?: string;
   serviceName?: string;
+  serviceCode?: string;
   price?: string;
   billingCycle?: string;
   firstBillingDate?: string;
@@ -78,10 +81,13 @@ function toPaymentDate(value: string | null | undefined) {
  */
 export function toSubscribeDraft(input: SubscribeDraftInput): SubscribeDraft {
   const service = input.serviceName?.trim();
+  const serviceCode = input.serviceCode?.trim();
 
   return {
     category: toCategory(input.category),
     service: service ? service : null,
+    // 값 검증은 서버가 한다 — 카탈로그에 없는 code면 등록 요청이 400으로 막힌다.
+    serviceCode: serviceCode ? serviceCode : null,
     price: toPrice(input.price),
     billingCycle: toBillingCycle(input.billingCycle),
     paymentDate: toPaymentDate(input.firstBillingDate),
@@ -102,6 +108,7 @@ export function toConfirmParams(result: OcrScanResult): SubscribeConfirmParams {
 
   if (result.category) params.category = result.category;
   if (result.serviceName) params.serviceName = result.serviceName;
+  if (result.serviceCode) params.serviceCode = result.serviceCode;
   if (result.price != null) params.price = String(result.price);
   if (result.billingCycle) params.billingCycle = result.billingCycle;
   if (result.firstBillingDate) params.firstBillingDate = result.firstBillingDate;

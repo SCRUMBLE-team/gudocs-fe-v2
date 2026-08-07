@@ -67,7 +67,9 @@ function DaySection({
             onClick={() =>
               push("SubscribeDetail", { id: String(item.subscriptionId) })
             }
-            startContent={<ServiceLogo name={item.serviceName} />}
+            startContent={
+              <ServiceLogo name={item.serviceName} code={item.serviceCode} />
+            }
             label={
               <Text type="body" weight="semibold">
                 {item.serviceName}

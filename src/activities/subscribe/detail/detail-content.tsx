@@ -141,7 +141,7 @@ function SubscriptionDetailContent({ id }: { id: string }) {
         <HStack gap={2} align="center">
           <ServiceLogo
             name={data.serviceName}
-            fallbackName={data.serviceName}
+            code={data.serviceCode}
             size={28}
           />
           <Text type="body" weight="semibold" color="secondary">
