@@ -131,9 +131,22 @@ function MonthlyExpensePanel({ subscriptions, year, month }: Props) {
    * 달력에서 지난 날을 선택하면 예정 쪽이 비는데, 기본값을 "예정"으로 못박아두면
    * 빈 화면부터 보게 된다. 반대로 사용자가 직접 고른 뒤에는 비어 있어도 그 탭을
    * 지켜야 해서, 초기값을 계산하지 않고 선택 여부를 따로 들고 있는다.
+   *
+   * 선택은 그때 보고 있던 달에만 유효하다. 달을 옮기면 상황이 달라지므로
+   * (지난달은 전부 완료, 다음 달은 전부 예정) 연·월을 함께 저장해 두고
+   * 달이 바뀌면 다시 데이터를 보고 정한다. effect로 초기화하면 이 저장소
+   * 린트 규칙에 걸려서 저장한 달과 비교하는 방식으로 푼다.
    */
-  const [picked, setPicked] = useState<Tab | null>(null);
-  const tab: Tab = picked ?? (upcoming.length > 0 ? "UPCOMING" : "PAST");
+  const [picked, setPicked] = useState<
+    { tab: Tab; year: number; month: number } | null
+  >(null);
+  const isPickedForThisMonth =
+    picked != null && picked.year === year && picked.month === month;
+  const tab: Tab = isPickedForThisMonth
+    ? picked.tab
+    : upcoming.length > 0
+      ? "UPCOMING"
+      : "PAST";
 
   const isPast = tab === "PAST";
   const groups = isPast ? past : upcoming;
@@ -144,7 +157,7 @@ function MonthlyExpensePanel({ subscriptions, year, month }: Props) {
         label="결제 상태"
         layout="fill"
         value={tab}
-        onChange={(value) => setPicked(value as Tab)}
+        onChange={(value) => setPicked({ tab: value as Tab, year, month })}
       >
         <SegmentedControlItem value="UPCOMING" label="결제 예정" />
         <SegmentedControlItem value="PAST" label="결제 완료" />
