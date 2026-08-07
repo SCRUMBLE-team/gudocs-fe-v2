@@ -10,6 +10,7 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { useToast } from "@astryxdesign/core/Toast";
 import FixedBottomCTA from "../../../../components/fixed-bottom-cta";
 import { useCreateSubscriptionMutation } from "../../../../hooks/query/useCreateSubscriptionMutation";
+import { useCatalogQuery } from "../../../../hooks/query/useCatalogQuery";
 import type { BillingCycle } from "../../../../types/subscribe";
 import {
   SubscribeContext,
@@ -42,6 +43,7 @@ const SubscribeNewPayActivity: StaticActivityComponentType<
 
   const { pop } = useFlow();
   const goBack = useGoBack();
+  const { data: catalog } = useCatalogQuery();
   const showToast = useToast();
   const { mutate, isPending } = useCreateSubscriptionMutation();
 
@@ -49,8 +51,13 @@ const SubscribeNewPayActivity: StaticActivityComponentType<
     category: params.category,
     onChangeCategory: () => {},
     service: params.service,
-    // 이 화면에는 ServiceField가 없다. code는 확정 화면에서 카탈로그로 되찾는다.
-    serviceCode: null,
+    // 등록 제출이 이 화면에서 일어나므로 code도 여기서 확정한다.
+    // 화면 사이는 라우트 params로만 값이 넘어오는데 거기엔 이름뿐이라,
+    // 직전 화면에서 카탈로그로 고른 이름을 그대로 되짚어 code를 찾는다.
+    // (params에 code까지 실으면 라우트 타입이 늘고 URL도 지저분해진다)
+    serviceCode:
+      catalog.services.find((item) => item.name === params.service)?.code ??
+      null,
     onChangeService: () => {},
     billingCycle,
     onChangeBillingCycle: setBillingCycle,
