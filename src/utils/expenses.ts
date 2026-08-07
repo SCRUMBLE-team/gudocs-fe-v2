@@ -1,5 +1,6 @@
 import type { MonthlyDetailData, TrendData } from "../types/expenses";
-import { toYearMonth } from "./date";
+import type { SubscriptionDetail } from "../types/subscribe";
+import { compareYearMonth, toYearMonth, type YearMonth } from "./date";
 
 /**
  * 추이 차트에 그릴 최대 개월 수.
@@ -8,6 +9,33 @@ import { toYearMonth } from "./date";
  * 만큼으로 잘라두고, 두 기준이 같은 구간을 보도록 양쪽 다 이 값을 쓴다.
  */
 const MAX_TREND_MONTHS = 6;
+
+/**
+ * 구독을 처음 등록한 달. 하나도 없으면 null.
+ *
+ * 추이 차트가 과거로 갈 수 있는 하한이다. 그보다 앞은 서버가 0만 돌려주므로
+ * (지출 집계는 createdAt 기준이다) 빈 막대만 늘어선 화면을 보게 된다.
+ *
+ * createdAt은 "2026-03-15T10:00:00" 꼴이라 앞 7자리만 잘라 쓴다. Date로 파싱하면
+ * 타임존 때문에 월이 밀릴 수 있다.
+ */
+export function earliestSubscribedMonth(
+  subscriptions: SubscriptionDetail[],
+): YearMonth | null {
+  let earliest: YearMonth | null = null;
+
+  for (const { createdAt } of subscriptions) {
+    const [year, month] = createdAt.slice(0, 7).split("-").map(Number);
+    if (!year || !month) continue;
+
+    const candidate = { year, month };
+    if (!earliest || compareYearMonth(candidate, earliest) < 0) {
+      earliest = candidate;
+    }
+  }
+
+  return earliest;
+}
 
 /** 추이 응답에서 최근 구간만 남긴다. 서버가 더 긴 구간을 내려줘도 화면은 일정하다. */
 export function recentTrend(monthlyTrends: TrendData["monthlyTrends"]) {

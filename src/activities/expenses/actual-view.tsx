@@ -2,14 +2,23 @@ import { useExpensesTrendsQuery } from "../../hooks/query/useExpensesTrendsQuery
 import { useMonthlyExpenseQuery } from "../../hooks/query/useMonthlyExpenseQuery";
 import { useMonthlyExpensesQueries } from "../../hooks/query/useMonthlyExpensesQueries";
 import { useMonthlyExpenseDetailQuery } from "../../hooks/query/useMonthlyExpensesDetailsQuery";
-import { toDayOfMonth } from "../../utils/date";
-import { isBilledIn, isListed, isPaused, recentTrend } from "../../utils/expenses";
+import { toDayOfMonth, type YearMonth } from "../../utils/date";
+import { useSubscriptionsQuery } from "../../hooks/query/useSubscriptionsQuery";
+import {
+  earliestSubscribedMonth,
+  isBilledIn,
+  isListed,
+  isPaused,
+  recentTrend,
+} from "../../utils/expenses";
 import ExpensesView, { type ExpenseRow } from "./expenses-view";
 
 type Props = {
-  base: { year: number; month: number };
-  selected: { year: number; month: number };
-  onSelectMonth: (period: { year: number; month: number }) => void;
+  windowEnd: YearMonth;
+  current: YearMonth;
+  onWindowEndChange: (period: YearMonth) => void;
+  selected: YearMonth;
+  onSelectMonth: (period: YearMonth) => void;
 };
 
 /**
@@ -22,8 +31,14 @@ type Props = {
  * 추이 응답은 월 환산 총액만 주므로 달마다 actualAmount를 따로 받는다.
  * (요청이 달 수만큼 나가서 이 기준을 골랐을 때만 마운트된다.)
  */
-function ActualView({ base, selected, onSelectMonth }: Props) {
-  const { data: trends } = useExpensesTrendsQuery(base);
+function ActualView({
+  windowEnd,
+  current,
+  onWindowEndChange,
+  selected,
+  onSelectMonth,
+}: Props) {
+  const { data: trends } = useExpensesTrendsQuery(windowEnd);
   const periods = recentTrend(trends.monthlyTrends);
 
   const results = useMonthlyExpensesQueries(
@@ -33,21 +48,16 @@ function ActualView({ base, selected, onSelectMonth }: Props) {
   const { data: monthly } = useMonthlyExpenseQuery(selected);
   // 목록에 무엇이 찍히는지는 상세에서만 알 수 있다.
   const { data: detail } = useMonthlyExpenseDetailQuery(selected);
+  // 비교 문구의 기준. 창을 과거로 옮겨도 이 값은 늘 실제 현재 달이다.
+  const { data: currentMonthly } = useMonthlyExpenseQuery(current);
+  // 기간을 과거로 옮길 수 있는 하한을 구하려고 전체 구독을 받는다.
+  const { data: subscriptions } = useSubscriptionsQuery({});
 
   const trend = periods.map((period, index) => ({
     year: period.year,
     month: period.month,
     totalAmount: results[index].data.actualAmount,
   }));
-
-  const selectedIndex = trend.findIndex(
-    ({ year, month }) => year === selected.year && month === selected.month,
-  );
-  // 이전 달이 추이 구간 밖이면 비교할 수가 없다. 문구를 통째로 생략한다.
-  const changeAmount =
-    selectedIndex > 0
-      ? monthly.actualAmount - trend[selectedIndex - 1].totalAmount
-      : null;
 
   const rows: ExpenseRow[] = detail.subscriptions
     .filter(isListed)
@@ -66,15 +76,19 @@ function ActualView({ base, selected, onSelectMonth }: Props) {
     <ExpensesView
       model={{
         totalAmount: monthly.actualAmount,
-        changeAmount,
+        currentAmount: currentMonthly.actualAmount,
         monthlyAmount: monthly.monthlySubscriptionAmount,
         // 실제 청구액에서 월간분을 뺀 나머지가 이 달에 빠져나가는 연간 결제분이다.
         yearlyAmount: monthly.actualAmount - monthly.monthlySubscriptionAmount,
         trend,
         rows,
+        earliestMonth: earliestSubscribedMonth(subscriptions),
       }}
       selected={selected}
       onSelectMonth={onSelectMonth}
+      windowEnd={windowEnd}
+      current={current}
+      onWindowEndChange={onWindowEndChange}
       yearlyLabel="연간 구독"
       emptyYearlyHint="이 달은 연간 결제가 없어요"
     />

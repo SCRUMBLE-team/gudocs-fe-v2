@@ -7,6 +7,27 @@ export function getBaseYearMonth() {
   };
 }
 
+export type YearMonth = { year: number; month: number };
+
+/**
+ * 연·월에 개월 수를 더한다(음수면 뺀다). 해를 넘어가도 알아서 맞춘다.
+ * month는 1-based라 0-based로 내렸다가 되돌린다.
+ */
+export function addMonths({ year, month }: YearMonth, amount: number): YearMonth {
+  const zeroBased = year * 12 + (month - 1) + amount;
+  return { year: Math.floor(zeroBased / 12), month: (zeroBased % 12) + 1 };
+}
+
+/** 두 연·월의 선후 비교. a가 b보다 앞이면 음수, 같으면 0, 뒤면 양수. */
+export function compareYearMonth(a: YearMonth, b: YearMonth): number {
+  return a.year * 12 + a.month - (b.year * 12 + b.month);
+}
+
+/** "2026.02"처럼 표시용으로 찍는다. */
+export function formatYearMonth({ year, month }: YearMonth): string {
+  return `${year}.${String(month).padStart(2, "0")}`;
+}
+
 /** "YYYY-MM-DD" ISO 문자열에서 연·월을 뽑는다. 캘린더가 보고 있는 월을 쿼리 인자로 넘길 때 쓴다. */
 export function toYearMonth(iso: string) {
   const [year, month] = iso.split("-");
