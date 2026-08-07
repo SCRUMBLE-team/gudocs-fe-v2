@@ -48,6 +48,7 @@ function ConvertedView({
     .map((item) => ({
       subscriptionId: item.subscriptionId,
       serviceName: item.serviceName,
+      serviceCode: item.serviceCode,
       billingCycle: item.billingCycle,
       amount: item.appliedMonthlyAmount,
       note:

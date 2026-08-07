@@ -19,6 +19,8 @@ import { useCoachMark } from "./use-coach-mark";
 export type ExpenseRow = {
   subscriptionId: number;
   serviceName: string;
+  /** 카탈로그 code. 로고 조회 키. 직접 입력한 서비스는 null이다. */
+  serviceCode: string | null;
   billingCycle: BillingCycle;
   /** 선택한 기준으로 계산된 이 달 금액. */
   amount: number;
@@ -244,7 +246,9 @@ function ExpenseList({ rows, month }: { rows: ExpenseRow[]; month: number }) {
                 onClick={() =>
                   push("SubscribeDetail", { id: String(item.subscriptionId) })
                 }
-                startContent={<ServiceLogo name={item.serviceName} />}
+                startContent={
+                  <ServiceLogo name={item.serviceName} code={item.serviceCode} />
+                }
                 label={
                   <HStack gap={1} align="center">
                     <Text type="body" weight="semibold">

@@ -223,7 +223,11 @@ function AnalyzeContent({ year, month }: { year: number; month: number }) {
                         })
                       }
                       startContent={
-                        <ServiceLogo name={service.serviceName} size={28} />
+                        <ServiceLogo
+                          name={service.serviceName}
+                          code={service.serviceCode}
+                          size={28}
+                        />
                       }
                       label={
                         <Text type="body" weight="semibold">
@@ -274,7 +278,11 @@ function AnalyzeContent({ year, month }: { year: number; month: number }) {
                       >
                         {i + 1}
                       </Text>
-                      <ServiceLogo name={service.serviceName} size={36} />
+                      <ServiceLogo
+                        name={service.serviceName}
+                        code={service.serviceCode}
+                        size={36}
+                      />
                     </HStack>
                   }
                   label={

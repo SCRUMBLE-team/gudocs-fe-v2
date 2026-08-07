@@ -52,6 +52,8 @@ export interface MonthlyDetailData {
   subscriptions: {
     subscriptionId: number;
     serviceName: string;
+    /** 카탈로그 code. 로고 조회 키. 직접 입력한 서비스는 null이다. */
+    serviceCode: string | null;
     category: SubscribeCategory;
     categoryName: string;
     billingCycle: BillingCycle;

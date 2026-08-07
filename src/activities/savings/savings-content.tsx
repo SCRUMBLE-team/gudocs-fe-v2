@@ -222,9 +222,7 @@ function SavingsContent() {
                       size="sm"
                       className="pointer-events-none"
                     />
-                    <ServiceLogo
-                      name={row.serviceName}
-                    />
+                    <ServiceLogo name={row.serviceName} code={row.serviceCode} />
                   </HStack>
                 }
                 label={

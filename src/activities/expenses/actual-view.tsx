@@ -65,6 +65,7 @@ function ActualView({
     .map((item) => ({
       subscriptionId: item.subscriptionId,
       serviceName: item.serviceName,
+      serviceCode: item.serviceCode,
       billingCycle: item.billingCycle,
       amount: item.originalPrice,
       note: item.billingCycle === "YEARLY" ? "1년치 결제 금액" : undefined,

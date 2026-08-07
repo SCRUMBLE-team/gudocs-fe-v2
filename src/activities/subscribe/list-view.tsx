@@ -67,9 +67,7 @@ function ListView() {
                       push("SubscribeDetail", { id: String(item.id) })
                     }
                     startContent={
-                      <ServiceLogo
-                        name={item.serviceName}
-                      />
+                      <ServiceLogo name={item.serviceName} code={item.serviceCode} />
                     }
                     label={
                       <HStack gap={1} align="center">
