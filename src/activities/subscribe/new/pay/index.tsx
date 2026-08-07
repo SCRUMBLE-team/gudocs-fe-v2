@@ -16,6 +16,7 @@ import {
   type SubscribeContextValue,
 } from "../subscribe-context";
 import { toSubscribePayload } from "../to-subscribe-payload";
+import PlanField from "../funnel/plan-field";
 import PriceField from "../funnel/price-field";
 import BillingCycleField from "../funnel/billing-cycle-field";
 import BillingDateField from "../funnel/billing-date-field";
@@ -112,6 +113,7 @@ const SubscribeNewPayActivity: StaticActivityComponentType<
               </Heading>
 
               <VStack gap={2}>
+                <PlanField />
                 <PriceField />
                 <BillingCycleField />
                 <BillingDateField />

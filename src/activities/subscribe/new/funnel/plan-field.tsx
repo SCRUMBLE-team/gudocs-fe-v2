@@ -1,0 +1,54 @@
+import SheetSelectField from "../../../../components/line-field/sheet-select-field";
+import { useCatalogQuery } from "../../../../hooks/query/useCatalogQuery";
+import { formatWon } from "../../../../utils/format";
+import { useSubscribeContext } from "../subscribe-context";
+
+/**
+ * 카탈로그가 아는 요금제를 골라 이용요금과 결제 주기를 한 번에 채운다.
+ *
+ * 사용자가 매번 금액을 검색해 입력하지 않게 하려는 것이 이 필드의 목적이다.
+ * 다만 채워주는 값은 어디까지나 정가 기준 기본값이라, 고른 뒤에도 아래
+ * 이용요금 칸에서 그대로 고칠 수 있다(할인·프로모션·구 요금제 사용자).
+ *
+ * 요금제를 확인하지 못한 서비스와 직접 입력한 서비스는 고를 게 없으므로
+ * 이 필드를 아예 그리지 않고 기존처럼 금액을 직접 받는다.
+ */
+function PlanField() {
+  const { serviceCode, price, billingCycle, onChangePrice, onChangeBillingCycle } =
+    useSubscribeContext("PlanField");
+  const { data: catalog } = useCatalogQuery();
+
+  const plans = serviceCode
+    ? (catalog.services.find((item) => item.code === serviceCode)?.plans ?? [])
+    : [];
+
+  if (plans.length === 0) {
+    return null;
+  }
+
+  // 선택 상태를 따로 들지 않고 현재 금액·주기에서 되짚는다. 사용자가 금액을 직접
+  // 고치면 어떤 요금제와도 안 맞으므로 자연스럽게 선택이 풀린다.
+  const selected = plans.find(
+    (plan) => plan.price === price && plan.billingCycle === billingCycle,
+  );
+
+  return (
+    <SheetSelectField
+      label="요금제"
+      placeholder="요금제 선택"
+      options={plans.map((plan) => ({
+        value: plan.name,
+        label: `${plan.name} · ${formatWon(plan.price)}`,
+      }))}
+      value={selected?.name ?? null}
+      onChange={(name) => {
+        const plan = plans.find((item) => item.name === name);
+        if (!plan) return;
+        onChangePrice(plan.price);
+        onChangeBillingCycle(plan.billingCycle);
+      }}
+    />
+  );
+}
+
+export default PlanField;
