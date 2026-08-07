@@ -55,6 +55,8 @@ export interface SubscriptionDetail {
  */
 export type OcrScanResult = {
   serviceName: string | null;
+  /** 카탈로그 매칭에 성공했을 때만 채워진다. 등록 요청에 그대로 실어 로고를 잇는다. */
+  serviceCode: string | null;
   category: SubscribeCategory | null;
   price: number | null;
   billingCycle: BillingCycle | null;

@@ -15,7 +15,6 @@ import {
   type SubscribeContextValue,
 } from "../subscribe-context";
 import { toSubscribeDraft } from "../to-subscribe-draft";
-import { useCatalogQuery } from "../../../../hooks/query/useCatalogQuery";
 import { toSubscribePayload } from "../to-subscribe-payload";
 import CategoryField from "../funnel/category-field";
 import ServiceField from "../funnel/service-field";
@@ -42,6 +41,7 @@ const SubscribeNewConfirmActivity: StaticActivityComponentType<
 
   const [category, setCategory] = useState(draft.category);
   const [service, setService] = useState(draft.service);
+  const [serviceCode, setServiceCode] = useState(draft.serviceCode);
   const [billingCycle, setBillingCycle] = useState(draft.billingCycle);
   const [price, setPrice] = useState(draft.price);
   const [paymentDate, setPaymentDate] = useState(draft.paymentDate);
@@ -50,17 +50,18 @@ const SubscribeNewConfirmActivity: StaticActivityComponentType<
   const goBack = useGoBack();
   const showToast = useToast();
   const { mutate, isPending } = useCreateSubscriptionMutation();
-  const { data: catalog } = useCatalogQuery();
 
   const contextValue: SubscribeContextValue = {
     category,
     onChangeCategory: setCategory,
     service,
-    // 방금 카탈로그에서 고른 이름이라 여기서 되찾아도 정확히 맞는다.
-    // (퍼널 params로 code까지 나르면 라우트 타입이 늘어난다)
-    serviceCode:
-      catalog.services.find((item) => item.name === service)?.code ?? null,
-    onChangeService: setService,
+    // OCR이 인식한 code를 그대로 쓴다. 사용자가 서비스를 바꾸면 고른 항목의
+    // code로 교체한다 — 이름으로 되찾지 않는다.
+    serviceCode,
+    onChangeService: (value, code) => {
+      setService(value);
+      setServiceCode(code ?? null);
+    },
     billingCycle,
     onChangeBillingCycle: setBillingCycle,
     price,
