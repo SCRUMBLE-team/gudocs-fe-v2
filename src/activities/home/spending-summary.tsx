@@ -55,6 +55,11 @@ function MonthBar({
   width?: number;
   height?: number;
 }) {
+  // 키보드로 옮겨 다닐 때 어느 막대에 있는지 보여야 한다. SVG라 outline이
+  // 브라우저마다 제각각으로 그려져서, 선택 상태와 같은 테두리로 직접 표시한다.
+  // 훅은 조기 반환보다 앞에 있어야 렌더마다 호출 순서가 같다.
+  const [isFocused, setIsFocused] = useState(false);
+
   if (!payload) return null;
 
   const isSelected = selectedKey === payload.key;
@@ -67,7 +72,8 @@ function MonthBar({
 
   // 선택·호버는 명도로 구분한다. 이번 달 막대는 이미 원색이라 더 밝힐 게 없어
   // 불투명도만 1로 두고 테두리로만 상태를 알린다.
-  const fillOpacity = isSelected || isHovered ? 1 : 0.75;
+  const fillOpacity = isSelected || isHovered || isFocused ? 1 : 0.75;
+  const hasOutline = isSelected || isFocused;
 
   return (
     <g
@@ -79,6 +85,8 @@ function MonthBar({
       onClick={() => onSelect(payload)}
       onMouseEnter={() => onHover(payload.key)}
       onMouseLeave={() => onHover(null)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
       onKeyDown={(event) => {
         if (event.key !== "Enter" && event.key !== " ") return;
         event.preventDefault();
@@ -90,8 +98,8 @@ function MonthBar({
         radius={[6, 6, 0, 0]}
         fill={fill}
         fillOpacity={fillOpacity}
-        stroke={isSelected ? "var(--color-accent)" : "none"}
-        strokeWidth={isSelected ? 2 : 0}
+        stroke={hasOutline ? "var(--color-accent)" : "none"}
+        strokeWidth={hasOutline ? 2 : 0}
       />
     </g>
   );
