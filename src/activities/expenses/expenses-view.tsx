@@ -353,7 +353,6 @@ function ExpensesView({
         <SpendingComparison
           amount={totalAmount}
           compared={{ label: "이번 달", amount: currentAmount }}
-          highlight="directional"
         />
       </VStack>
 
