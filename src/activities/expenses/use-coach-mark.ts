@@ -6,7 +6,7 @@ import { useState } from "react";
  * 서버에 둘 만한 값이 아니고 기기마다 한 번씩 보여주면 충분해서 localStorage를 쓴다.
  * (푸시 쪽 gudocs.push.* 와 같은 방식)
  */
-const STORAGE_KEY = "gudocs.expenses.chartCoachMark";
+const STORAGE_KEY = "gudocs.expenses.chartCoachMark.v2";
 
 function hasSeen(): boolean {
   try {
