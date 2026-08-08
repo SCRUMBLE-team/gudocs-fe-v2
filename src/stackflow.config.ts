@@ -23,6 +23,8 @@ export const config = defineConfig({
     { name: "Savings", route: "/savings" },
     { name: "SubscribeNewStart", route: "/subscribe/new" },
     { name: "SubscribeNew", route: "/subscribe/new/service" },
+    { name: "SubscribeNewSearch", route: "/subscribe/new/search" },
+    { name: "SubscribeNewCustom", route: "/subscribe/new/custom" },
     { name: "SubscribeNewPay", route: "/subscribe/new/pay" },
     { name: "SubscribeNewConfirm", route: "/subscribe/new/confirm" },
     { name: "SubscribeDetail", route: "/subscribe/:id" },
@@ -44,6 +46,10 @@ declare module "@stackflow/config" {
     Savings: Record<string, never>;
     SubscribeNewStart: Record<string, never>;
     SubscribeNew: Record<string, never>;
+    // category가 없으면 전체 검색, 있으면 해당 카테고리 안에서 검색한다.
+    SubscribeNewSearch: { category?: SubscribeCategory };
+    // 카테고리로 찾다가 들어왔으면 그 카테고리가 채워져 있다.
+    SubscribeNewCustom: { category?: SubscribeCategory };
     // serviceCode 는 카탈로그에서 고른 경우에만 있다(직접 입력이면 없음).
     // 제출 시 쓰는 불변 식별자라, 표시명으로 되찾지 않고 그대로 나른다.
     SubscribeNewPay: {

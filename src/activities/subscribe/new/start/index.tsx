@@ -127,7 +127,7 @@ const SubscribeNewStartActivity: StaticActivityComponentType<
               />
               <ListItem
                 label="직접 입력하기"
-                description="카테고리부터 하나씩 골라 등록해요"
+                description="서비스 이름을 검색하거나 카테고리에서 찾아보세요"
                 startContent={
                   <Icon icon={PencilIcon} size="lg" color="accent" />
                 }
