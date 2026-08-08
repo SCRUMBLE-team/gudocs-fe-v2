@@ -4,7 +4,7 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { useFlow } from "@stackflow/react";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Bar, BarChart, LabelList, ResponsiveContainer, XAxis } from "recharts";
 import EmptyState from "../../components/empty-state";
 import SpendingComparison from "../../components/spending-comparison";
@@ -172,11 +172,15 @@ function TrendChart({
   };
 
   return (
-    <ResponsiveContainer width="100%" height={220}>
+    <ResponsiveContainer
+      width="100%"
+      height={200}
+      className="[&_.recharts-surface]:!overflow-visible"
+    >
       {/* 막대 자체는 얇을 수 있어서 차트에도 클릭을 걸어 열(column) 전체를 탭 영역으로 쓴다. */}
       <BarChart
         data={chartData}
-        margin={{ top: 58 }}
+        margin={{ top: 24 }}
         onClick={(state) => selectByIndex(state?.activeTooltipIndex)}
         style={{ cursor: "pointer" }}
       >
@@ -190,6 +194,7 @@ function TrendChart({
           dataKey="amount"
           radius={[6, 6, 0, 0]}
           minPointSize={2}
+          isAnimationActive={false}
           onClick={(_, index) => selectByIndex(index)}
         >
           <LabelList
@@ -317,11 +322,28 @@ function ExpensesView({
     earliestMonth,
   } = model;
   const coachMark = useCoachMark();
+  const [pendingSelected, setPendingSelected] = useState<YearMonth | null>(null);
+
+  // 월별 합계는 차트 데이터에 이미 있으므로 API 응답을 기다리지 않고 선택과 금액을
+  // 먼저 반영한다. 구성·목록 같은 상세 데이터는 기존 transition 안에서 이어서 바뀐다.
+  const displayedSelected = pendingSelected ?? selected;
+  const displayedTotalAmount =
+    trend.find(
+      ({ year, month }) =>
+        year === displayedSelected.year && month === displayedSelected.month,
+    )?.totalAmount ?? totalAmount;
 
   // 막대를 누르면 안내를 본 것으로 친다.
   const selectMonth = (period: { year: number; month: number }) => {
     coachMark.dismiss();
+    setPendingSelected(period);
     onSelectMonth(period);
+  };
+
+  // 기간 창 자체가 바뀔 때는 이전 막대의 낙관적 선택을 남기지 않는다.
+  const changeWindow = (period: YearMonth) => {
+    setPendingSelected(null);
+    onWindowEndChange(period);
   };
 
   // 가로 스와이프로도 기간을 넘길 수 있게 한다. 화살표만으로는 모바일에서 답답하다.
@@ -341,14 +363,14 @@ function ExpensesView({
     // 왼쪽으로 밀면 다음(미래) 기간. 현재 달을 넘어서지는 않는다.
     if (deltaX < 0) {
       if (compareYearMonth(windowEnd, current) < 0) {
-        onWindowEndChange(addMonths(windowEnd, 1));
+        changeWindow(addMonths(windowEnd, 1));
       }
       return;
     }
 
     // 오른쪽으로 밀면 이전 기간. 첫 구독 등록 달보다 앞으로는 못 간다.
     if (earliestMonth && compareYearMonth(windowEnd, earliestMonth) <= 0) return;
-    onWindowEndChange(addMonths(windowEnd, -1));
+    changeWindow(addMonths(windowEnd, -1));
   };
 
   return (
@@ -356,15 +378,15 @@ function ExpensesView({
       <VStack gap={1}>
         {/* 지금 보고 있는 달을 또렷하게 — 막대를 옮겨 다니면 여기가 유일한 단서다. */}
         <Text className="text-lg" weight="bold">
-          {selected.month}월 지출
+          {displayedSelected.month}월 지출
         </Text>
         <Text type="display-3" weight="bold" hasTabularNumbers>
-          {formatWon(totalAmount)}
+          {formatWon(displayedTotalAmount)}
         </Text>
         <SpendingComparison
-          amount={totalAmount}
+          amount={displayedTotalAmount}
           compared={{ label: "이번 달", amount: currentAmount }}
-          isPast={compareYearMonth(selected, current) < 0}
+          isPast={compareYearMonth(displayedSelected, current) < 0}
         />
       </VStack>
 
@@ -373,7 +395,7 @@ function ExpensesView({
           windowEnd={windowEnd}
           current={current}
           earliest={earliestMonth}
-          onWindowEndChange={onWindowEndChange}
+          onWindowEndChange={changeWindow}
         />
 
         <VStack
@@ -390,7 +412,7 @@ function ExpensesView({
         >
           <TrendChart
             trend={trend}
-            selected={selected}
+            selected={displayedSelected}
             onSelectMonth={selectMonth}
             showCoachMark={coachMark.isVisible}
             onDismissCoachMark={coachMark.dismiss}

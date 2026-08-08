@@ -60,7 +60,7 @@ const LoginActivity: StaticActivityComponentType<"Login"> = () => {
             justify="center"
             className="whitespace-pre-line"
           >
-            {"똑똑한 구독\n똑구로 시작하세요"}
+            {"똑똑한 구독\nGudocs로 시작하세요"}
           </Text>
         </VStack>
 
