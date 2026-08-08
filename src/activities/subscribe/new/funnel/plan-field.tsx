@@ -1,3 +1,5 @@
+import { VStack } from "@astryxdesign/core/VStack";
+import { Text } from "@astryxdesign/core/Text";
 import SheetSelectField from "../../../../components/line-field/sheet-select-field";
 import { useCatalogQuery } from "../../../../hooks/query/useCatalogQuery";
 import { formatWon } from "../../../../utils/format";
@@ -32,13 +34,20 @@ function PlanField() {
     (plan) => plan.price === price && plan.billingCycle === billingCycle,
   );
 
+  // 고른 요금제가 환산값이면 왜 실제 청구액과 다를 수 있는지 알려준다.
+  const note = selected?.approximate
+    ? "달러로 청구되는 서비스예요. 환율과 해외결제 수수료에 따라 실제 결제액이 달라질 수 있어요."
+    : undefined;
+
   return (
-    <SheetSelectField
+    <VStack gap={1}>
+      <SheetSelectField
       label="요금제"
       placeholder="요금제 선택"
       options={plans.map((plan) => ({
         value: plan.name,
-        label: `${plan.name} · ${formatWon(plan.price)}`,
+        // 환산 추정치는 "약"을 붙여 정가와 구분한다.
+        label: `${plan.name} · ${plan.approximate ? "약 " : ""}${formatWon(plan.price)}`,
       }))}
       value={selected?.name ?? null}
       onChange={(name) => {
@@ -47,7 +56,13 @@ function PlanField() {
         onChangePrice(plan.price);
         onChangeBillingCycle(plan.billingCycle);
       }}
-    />
+      />
+      {note && (
+        <Text type="supporting" color="secondary">
+          {note}
+        </Text>
+      )}
+    </VStack>
   );
 }
 

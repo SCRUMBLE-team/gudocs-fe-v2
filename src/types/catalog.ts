@@ -5,6 +5,11 @@ export type CatalogPlan = {
   name: string;
   price: number;
   billingCycle: BillingCycle;
+  /**
+   * 달러 요금을 환산한 추정치. 실제 결제액은 결제 시점 환율과 해외결제 수수료에 따라
+   * 달라지므로, 금액만 보여주지 말고 그렇다는 안내를 함께 띄운다.
+   */
+  approximate: boolean;
 };
 
 export type CatalogService = {
