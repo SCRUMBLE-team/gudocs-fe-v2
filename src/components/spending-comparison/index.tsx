@@ -15,20 +15,28 @@ type ComparedMonth = { label: string; amount: number };
 function SpendingComparison({
   amount,
   compared,
+  isPast = false,
 }: {
   /** 화면에서 설명할 달의 지출 금액. */
   amount: number;
   /** 비교 기준이 되는 달. 비교할 내역이 없으면 null. */
   compared: ComparedMonth | null;
+  /** 이미 끝난 달의 지출을 설명할 때 과거형 문구를 사용한다. */
+  isPast?: boolean;
 }) {
   if (!compared) {
     return <Text type="body">비교할 이전 내역이 없어요</Text>;
   }
 
   const difference = amount - compared.amount;
+  const ending = isPast ? "썼어요" : "쓰고 있어요";
 
   if (difference === 0) {
-    return <Text type="body">{compared.label}과 동일하게 쓰고 있어요</Text>;
+    return (
+      <Text type="body">
+        {compared.label}과 동일하게 {ending}
+      </Text>
+    );
   }
 
   return (
@@ -46,7 +54,7 @@ function SpendingComparison({
       >
         {formatWon(Math.abs(difference))}
       </Text>{" "}
-      {difference > 0 ? "더" : "덜"} 쓰고 있어요
+      {difference > 0 ? "더" : "덜"} {ending}
     </Text>
   );
 }

@@ -364,6 +364,7 @@ function ExpensesView({
         <SpendingComparison
           amount={totalAmount}
           compared={{ label: "이번 달", amount: currentAmount }}
+          isPast={compareYearMonth(selected, current) < 0}
         />
       </VStack>
 
