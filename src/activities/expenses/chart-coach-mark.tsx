@@ -57,7 +57,12 @@ function ChartCoachMark({
       className="cursor-pointer"
       onClick={onDismiss}
       onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") onDismiss();
+        if (event.key === " ") {
+          event.preventDefault();
+          onDismiss();
+          return;
+        }
+        if (event.key === "Enter") onDismiss();
       }}
     >
       <rect

@@ -25,7 +25,7 @@ function TabLayout({ children }: { children: ReactNode }) {
   const showToast = useToast();
   const { isEnabled, permission, enable, isPending } = usePushNotification();
   const topActivity = stack.activities[stack.activities.length - 1];
-  const isTopActivity = topActivity?.name === activity.name;
+  const isTopActivity = topActivity?.id === activity.id;
 
   // 다른 탭에서 돌아오며 기존 액티비티가 복원되는 경우에도 탭 클릭 의도대로
   // 최상단을 보여준다. 상세 화면의 일반 뒤로가기는 pending 대상이 아니라 유지된다.

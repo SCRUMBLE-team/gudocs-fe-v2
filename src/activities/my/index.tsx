@@ -47,7 +47,7 @@ const MyActivity: StaticActivityComponentType<"My"> = () => {
         <VStack padding={4} gap={3}>
           <Card className="border-gray-300">
             <HStack align="center" gap={3}>
-              <Avatar alt="사용자 프로필" size="medium" />
+              <Avatar alt={user?.name ?? ""} size="medium" />
               <VStack gap={0.5}>
                 <Text type="large" weight="bold">
                   {user?.name ?? ""}
