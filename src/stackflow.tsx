@@ -16,7 +16,7 @@ import MyActivity from "./activities/my";
 import SavingsActivity from "./activities/savings";
 import SubscribeNewStartActivity from "./activities/subscribe/new/start";
 import SubscribeNewActivity from "./activities/subscribe/new";
-import SubscribeNewCategoryActivity from "./activities/subscribe/new/category";
+import SubscribeNewSearchActivity from "./activities/subscribe/new/search";
 import SubscribeNewCustomActivity from "./activities/subscribe/new/custom";
 import SubscribeNewPayActivity from "./activities/subscribe/new/pay";
 import SubscribeNewConfirmActivity from "./activities/subscribe/new/confirm";
@@ -51,7 +51,7 @@ export const { Stack } = stackflow({
     Savings: withAuth(SavingsActivity),
     SubscribeNewStart: withAuth(SubscribeNewStartActivity),
     SubscribeNew: withAuth(SubscribeNewActivity),
-    SubscribeNewCategory: withAuth(SubscribeNewCategoryActivity),
+    SubscribeNewSearch: withAuth(SubscribeNewSearchActivity),
     SubscribeNewCustom: withAuth(SubscribeNewCustomActivity),
     SubscribeNewPay: withAuth(SubscribeNewPayActivity),
     SubscribeNewConfirm: withAuth(SubscribeNewConfirmActivity),

@@ -59,7 +59,7 @@ const SubscribeNewActivity: StaticActivityComponentType<
             <ServicePicker
               onSelect={pushPay}
               onSelectCategory={(category) =>
-                push("SubscribeNewCategory", { category })
+                push("SubscribeNewSearch", { category })
               }
               onCustom={() => push("SubscribeNewCustom", {})}
             />

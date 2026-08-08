@@ -75,9 +75,9 @@ function PayForm({ category, service, serviceCode }: PayFormProps) {
   const payload = toSubscribePayload(contextValue);
 
   const title = (() => {
-    if (!price) return "이용요금을\n알려주세요";
-    if (!billingCycle) return "결제 주기를\n알려주세요";
-    if (!paymentDate) return "최근 결제일을\n알려주세요";
+    if (!price) return "이용요금을 알려주세요";
+    if (!billingCycle) return "결제 주기를 알려주세요";
+    if (!paymentDate) return "최근 결제일을 알려주세요";
     return "이대로 등록할까요?";
   })();
 
@@ -107,9 +107,7 @@ function PayForm({ category, service, serviceCode }: PayFormProps) {
     <SubscribeContext.Provider value={contextValue}>
       <VStack className="flex-1">
         <VStack paddingInline={4} paddingBlock={2} gap={5}>
-          <Heading level={2} className="whitespace-pre-line">
-            {title}
-          </Heading>
+          <Heading level={2}>{title}</Heading>
 
           {/* 앞 화면에서 고른 서비스를 로고와 함께 다시 보여준다. 제목이
               단계마다 바뀌는 화면이라, 지금 무엇을 등록하는 중인지 짚어줄
