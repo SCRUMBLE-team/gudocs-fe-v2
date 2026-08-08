@@ -1,7 +1,7 @@
 import { VStack } from "@astryxdesign/core/VStack";
 import { Text } from "@astryxdesign/core/Text";
 import LineTextField from "../../../../components/line-field/line-text-field";
-import { useCatalogQuery } from "../../../../hooks/query/useCatalogQuery";
+import { useCatalogPlans } from "../../../../hooks/query/useCatalogPlans";
 import type { BillingCycle } from "../../../../types/subscribe";
 import { useSubscribeContext } from "../subscribe-context";
 
@@ -36,7 +36,7 @@ function PriceInput({ price, onChangePrice, note }: PriceInputProps) {
   );
 }
 
-type CatalogPriceInputProps = PriceInputProps & {
+type CatalogPriceInputProps = Omit<PriceInputProps, "note"> & {
   serviceCode: string;
   billingCycle: BillingCycle | null;
 };
@@ -48,10 +48,7 @@ function CatalogPriceInput({
   price,
   onChangePrice,
 }: CatalogPriceInputProps) {
-  const { data: catalog } = useCatalogQuery();
-
-  const plans =
-    catalog.services.find((item) => item.code === serviceCode)?.plans ?? [];
+  const plans = useCatalogPlans(serviceCode);
 
   // 지금 금액이 카탈로그 요금제와 그대로면 우리가 채운 값이다. 사용자가 한 자라도
   // 고치면 어떤 요금제와도 안 맞으니 안내가 저절로 사라진다.

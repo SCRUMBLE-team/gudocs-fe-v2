@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { useFlow, type StaticActivityComponentType } from "@stackflow/react";
+import type { StaticActivityComponentType } from "@stackflow/react";
 import { useGoBack } from "../../../hooks/useGoBack";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -26,9 +26,8 @@ import { useFunnelFlow } from "./use-funnel-flow";
 const SubscribeNewActivity: StaticActivityComponentType<
   "SubscribeNew"
 > = () => {
-  const { push } = useFlow();
   const goBack = useGoBack();
-  const { pushPay } = useFunnelFlow();
+  const { pushPay, pushSearch, pushCustom } = useFunnelFlow();
 
   return (
     <AppScreen>
@@ -58,10 +57,8 @@ const SubscribeNewActivity: StaticActivityComponentType<
           >
             <ServicePicker
               onSelect={pushPay}
-              onSelectCategory={(category) =>
-                push("SubscribeNewSearch", { category })
-              }
-              onCustom={() => push("SubscribeNewCustom", {})}
+              onSelectCategory={pushSearch}
+              onCustom={pushCustom}
             />
           </Suspense>
         </VStack>

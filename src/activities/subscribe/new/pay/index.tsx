@@ -12,7 +12,7 @@ import { Spinner } from "@astryxdesign/core/Spinner";
 import { useToast } from "@astryxdesign/core/Toast";
 import FixedBottomCTA from "../../../../components/fixed-bottom-cta";
 import ServiceLogo from "../../../../components/service-logo";
-import { useCatalogQuery } from "../../../../hooks/query/useCatalogQuery";
+import { useCatalogPlans } from "../../../../hooks/query/useCatalogPlans";
 import { useCreateSubscriptionMutation } from "../../../../hooks/query/useCreateSubscriptionMutation";
 import type { SubscribeCategory } from "../../../../types/subscribe";
 import {
@@ -40,11 +40,7 @@ type PayFormProps = {
  * 요금제는 이 화면의 요금제 필드에서 바꿀 수 있다.
  */
 function PayForm({ category, service, serviceCode }: PayFormProps) {
-  const { data: catalog } = useCatalogQuery();
-
-  const plans = serviceCode
-    ? (catalog.services.find((item) => item.code === serviceCode)?.plans ?? [])
-    : [];
+  const plans = useCatalogPlans(serviceCode);
   // 최초 렌더 한 번만 계산한다. 이후에는 사용자가 고친 값이 진실이다.
   const [seed] = useState(() => plans[0]);
 
@@ -75,7 +71,7 @@ function PayForm({ category, service, serviceCode }: PayFormProps) {
   const payload = toSubscribePayload(contextValue);
 
   const title = (() => {
-    if (!price) return "이용요금을 알려주세요";
+    if (price == null) return "이용요금을 알려주세요";
     if (!billingCycle) return "결제 주기를 알려주세요";
     if (!paymentDate) return "최근 결제일을 알려주세요";
     return "이대로 등록할까요?";

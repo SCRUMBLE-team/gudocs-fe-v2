@@ -55,7 +55,10 @@ export const CATEGORY_META = {
 export function isSubscribeCategory(
   value: string | undefined,
 ): value is keyof typeof CATEGORY_META {
-  return value != null && value in CATEGORY_META;
+  return (
+    value != null &&
+    Object.prototype.hasOwnProperty.call(CATEGORY_META, value)
+  );
 }
 
 /**

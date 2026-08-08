@@ -49,7 +49,9 @@ const SubscribeNewConfirmActivity: StaticActivityComponentType<
   const [billingCycle, setBillingCycle] = useState(draft.billingCycle);
   const [price, setPrice] = useState(draft.price);
   const [paymentDate, setPaymentDate] = useState(draft.paymentDate);
-  const isCustomService = serviceCode == null;
+  // OCR이 처음부터 서비스 code를 찾지 못한 경우에만 직접 입력 UI를 유지한다.
+  // 카탈로그 필드 안에서 code가 비워져도 화면 구조와 입력 포커스는 바뀌지 않는다.
+  const [isCustomService] = useState(() => draft.serviceCode == null);
 
   const { pop } = useFlow();
   const goBack = useGoBack();

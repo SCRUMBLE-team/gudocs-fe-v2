@@ -1,5 +1,5 @@
 import { Suspense, useDeferredValue, useState } from "react";
-import { useFlow, type StaticActivityComponentType } from "@stackflow/react";
+import type { StaticActivityComponentType } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
@@ -71,9 +71,8 @@ function ServiceList({ category, query, onSelect }: ServiceListProps) {
 const SubscribeNewSearchActivity: StaticActivityComponentType<
   "SubscribeNewSearch"
 > = ({ params }) => {
-  const { push } = useFlow();
   const goBack = useGoBack();
-  const { pushPay } = useFunnelFlow();
+  const { pushPay, pushCustom } = useFunnelFlow();
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const category = isSubscribeCategory(params.category)
@@ -142,9 +141,7 @@ const SubscribeNewSearchActivity: StaticActivityComponentType<
                   <Icon icon={PencilIcon} size="lg" color="accent" />
                 }
                 endContent={<Icon icon="chevronRight" size="sm" />}
-                onClick={() =>
-                  push("SubscribeNewCustom", category ? { category } : {})
-                }
+                onClick={() => pushCustom(category ?? undefined)}
               />
             </List>
           </VStack>
