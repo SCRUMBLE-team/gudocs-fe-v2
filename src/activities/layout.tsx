@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { useActivity, useFlow } from "@stackflow/react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { useActivity, useFlow, useStack } from "@stackflow/react";
 import Fab from "../components/fab";
 import { TabBar } from "../components/tab-bar";
 import { ROOT_TAB, TABS, type TabActivity } from "../constants/menus";
@@ -7,6 +7,9 @@ import { HStack, IconButton, Text, Icon, VStack } from "@astryxdesign/core";
 import { useToast } from "@astryxdesign/core/Toast";
 import { usePushNotification } from "../hooks/usePushNotification";
 import { AlarmIcon } from "./home/tab-icons";
+
+/** 탭 전환 뒤 최상단으로 올려야 할 화면. Stackflow가 이전 탭을 복원할 때도 유지한다. */
+let pendingScrollTarget: TabActivity | null = null;
 
 /**
  * 하단 탭이 붙는 화면들의 공통 껍데기.
@@ -17,8 +20,21 @@ import { AlarmIcon } from "./home/tab-icons";
 function TabLayout({ children }: { children: ReactNode }) {
   const { push, pop, replace } = useFlow();
   const activity = useActivity();
+  const stack = useStack();
+  const scrollContainerRef = useRef<HTMLElement>(null);
   const showToast = useToast();
   const { isEnabled, permission, enable, isPending } = usePushNotification();
+  const topActivity = stack.activities[stack.activities.length - 1];
+  const isTopActivity = topActivity?.name === activity.name;
+
+  // 다른 탭에서 돌아오며 기존 액티비티가 복원되는 경우에도 탭 클릭 의도대로
+  // 최상단을 보여준다. 상세 화면의 일반 뒤로가기는 pending 대상이 아니라 유지된다.
+  useEffect(() => {
+    if (!isTopActivity || pendingScrollTarget !== activity.name) return;
+
+    pendingScrollTarget = null;
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activity.name, isTopActivity]);
 
   /**
    * 벨 버튼은 알림을 "켜는" 경로만 담당한다. 끄는 건 마이 탭의 로그아웃뿐이다.
@@ -66,7 +82,13 @@ function TabLayout({ children }: { children: ReactNode }) {
   }
 
   const goTab = (target: TabActivity) => {
-    if (target === activity.name) return;
+    pendingScrollTarget = target;
+
+    if (target === activity.name) {
+      pendingScrollTarget = null;
+      scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
 
     if (target === ROOT_TAB) {
       if (activity.isRoot) replace(ROOT_TAB, {}, { animate: false });
@@ -80,7 +102,7 @@ function TabLayout({ children }: { children: ReactNode }) {
 
   return (
     <VStack height="100%">
-      <VStack isScrollable className="flex-1">
+      <VStack ref={scrollContainerRef} isScrollable className="flex-1">
         <HStack
           paddingInline={4}
           paddingBlock={2}

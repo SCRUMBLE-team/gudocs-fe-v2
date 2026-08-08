@@ -307,17 +307,6 @@ function ExpensesView({
   } = model;
   const coachMark = useCoachMark();
 
-  const isCurrentSelected =
-    selected.year === current.year && selected.month === current.month;
-
-  // 이번 달을 보고 있으면 견줄 대상이 자기 자신이라 의미가 없다.
-  // 홈 카드와 같게 지난달을 기본 비교 대상으로 삼는다.
-  const comparedPeriod = isCurrentSelected ? addMonths(current, -1) : selected;
-  const comparedEntry = trend.find(
-    ({ year, month }) =>
-      year === comparedPeriod.year && month === comparedPeriod.month,
-  );
-
   // 막대를 누르면 안내를 본 것으로 친다.
   const selectMonth = (period: { year: number; month: number }) => {
     coachMark.dismiss();
@@ -362,17 +351,9 @@ function ExpensesView({
           {formatWon(totalAmount)}
         </Text>
         <SpendingComparison
-          currentAmount={currentAmount}
-          compared={
-            comparedEntry
-              ? {
-                  label: isCurrentSelected
-                    ? "지난달"
-                    : `${selected.month}월`,
-                  amount: comparedEntry.totalAmount,
-                }
-              : null
-          }
+          amount={totalAmount}
+          compared={{ label: "이번 달", amount: currentAmount }}
+          highlight="directional"
         />
       </VStack>
 

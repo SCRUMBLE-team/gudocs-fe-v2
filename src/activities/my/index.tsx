@@ -1,7 +1,14 @@
 import type { StaticActivityComponentType } from "@stackflow/react";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
-import { Divider, Item, List, VStack } from "@astryxdesign/core";
+import { Avatar } from "@astryxdesign/core/Avatar";
+import { Card } from "@astryxdesign/core/Card";
+import { Divider } from "@astryxdesign/core/Divider";
+import { HStack } from "@astryxdesign/core/HStack";
+import { Item } from "@astryxdesign/core/Item";
+import { List } from "@astryxdesign/core/List";
+import { Text } from "@astryxdesign/core/Text";
+import { VStack } from "@astryxdesign/core/VStack";
 import { useToast } from "@astryxdesign/core/Toast";
 import TabLayout from "../layout";
 import { useLogoutMutation } from "../../hooks/query/useLogoutMutation";
@@ -37,12 +44,22 @@ const MyActivity: StaticActivityComponentType<"My"> = () => {
   return (
     <AppScreen preventSwipeBack>
       <TabLayout>
-        <VStack gap={2}>
-          <Item
-            density="spacious"
-            label={user?.name ?? ""}
-            description={user?.email}
-          />
+        <VStack padding={4} gap={3}>
+          <Card className="border-gray-300">
+            <HStack align="center" gap={3}>
+              <Avatar alt="사용자 프로필" size="medium" />
+              <VStack gap={0.5}>
+                <Text type="large" weight="bold">
+                  {user?.name ?? ""}
+                </Text>
+                {user?.email ? (
+                  <Text type="supporting" color="secondary">
+                    {user.email}
+                  </Text>
+                ) : null}
+              </VStack>
+            </HStack>
+          </Card>
           <Divider />
           <List>
             <Item
