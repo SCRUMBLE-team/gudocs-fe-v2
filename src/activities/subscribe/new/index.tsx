@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Suspense } from "react";
 import { useFlow, type StaticActivityComponentType } from "@stackflow/react";
 import { useGoBack } from "../../../hooks/useGoBack";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
@@ -7,90 +7,66 @@ import { HStack } from "@astryxdesign/core/HStack";
 import { Icon } from "@astryxdesign/core/Icon";
 import { IconButton } from "@astryxdesign/core/IconButton";
 import { Heading } from "@astryxdesign/core/Heading";
-import FixedBottomCTA from "../../../components/fixed-bottom-cta";
-import type { SubscribeCategory } from "../../../types/subscribe";
-import { SubscribeContext } from "./subscribe-context";
-import CategoryField from "./funnel/category-field";
-import ServiceField from "./funnel/service-field";
+import { Spinner } from "@astryxdesign/core/Spinner";
+import ServicePicker from "../../../components/service-picker";
+import { useFunnelFlow } from "./use-funnel-flow";
 
 /**
- * 구독 등록 퍼널 1단계 — 카테고리와 서비스를 고른다.
+ * 구독 등록 퍼널 1단계 — 어떤 서비스를 구독 중인지 고른다.
  *
- * 2단계는 별개 액티비티(SubscribeNewPay)다. 고른 값은 액티비티 파라미터로 넘긴다.
- * 이 화면은 그동안 계속 마운트돼 있어서, 2단계에서 뒤로 오면 선택값이 그대로 남는다.
+ * 예전에는 카테고리를 먼저 물었지만, 카테고리는 카탈로그의 서비스가 이미 들고
+ * 있는 값이라 사용자에게 다시 물을 이유가 없었다. 지금은 서비스만 고르면
+ * 카테고리가 따라오고, 카테고리는 이름이 기억나지 않을 때의 탐색 수단으로만
+ * 남는다. 카테고리를 직접 골라야 하는 건 카탈로그에 없는 서비스뿐이다
+ * (SubscribeNewCustom).
+ *
+ * 화면 골격(제목 크기·좌우 여백·메뉴 행 모양)은 등록 방식 선택 화면(start)을
+ * 그대로 따른다. 같은 퍼널의 연속된 두 화면이라 여백이 어긋나면 바로 보인다.
  */
-const SubscribeNewActivity: StaticActivityComponentType<"SubscribeNew"> = () => {
-  const [category, setCategory] = useState<SubscribeCategory | null>(null);
-  const [service, setService] = useState<string | null>(null);
-  const [serviceCode, setServiceCode] = useState<string | null>(null);
+const SubscribeNewActivity: StaticActivityComponentType<
+  "SubscribeNew"
+> = () => {
   const { push } = useFlow();
   const goBack = useGoBack();
-
-  const title = !category
-    ? "구독하는 서비스의\n카테고리를 알려주세요"
-    : "어떤 서비스를\n구독하고 계신가요?";
+  const { pushPay } = useFunnelFlow();
 
   return (
-    // 퍼널 필드들은 SubscribeContext에 바인딩돼 있다. 이 화면이 쓰지 않는 결제 관련
-    // 값은 2단계가 채우므로 여기서는 비워 둔다.
-    <SubscribeContext.Provider
-      value={{
-        category,
-        onChangeCategory: setCategory,
-        service,
-        serviceCode,
-        onChangeService: (value, code) => {
-          setService(value);
-          setServiceCode(code ?? null);
-        },
-        billingCycle: null,
-        onChangeBillingCycle: () => {},
-        price: null,
-        onChangePrice: () => {},
-        paymentDate: null,
-        onChangePaymentDate: () => {},
-      }}
-    >
-      <AppScreen>
-        <VStack minHeight="100%">
-          <HStack paddingInline={2} paddingBlock={2} align="center">
-            <IconButton
-              label="뒤로 가기"
-              icon={<Icon icon="chevronLeft" />}
-              variant="ghost"
-              onClick={goBack}
-            />
-          </HStack>
+    <AppScreen>
+      <VStack minHeight="100%">
+        <HStack paddingInline={2} paddingBlock={2} align="center">
+          <IconButton
+            label="뒤로 가기"
+            icon={<Icon icon="chevronLeft" />}
+            variant="ghost"
+            onClick={goBack}
+          />
+        </HStack>
 
-          <VStack className="flex-1">
-            <VStack paddingInline={4} paddingBlock={2} gap={5}>
-              <Heading level={2} className="whitespace-pre-line">
-                {title}
-              </Heading>
+        <VStack paddingInline={4} paddingBlock={2} gap={4}>
+          <Heading level={2} className="text-balance">
+            어떤 서비스를 구독하고 있나요?
+          </Heading>
 
-              <VStack gap={2}>
-                <CategoryField />
-                <ServiceField />
+          {/* 카탈로그는 suspense 쿼리라 경계가 필요하다. 없으면 첫 진입에서
+              스택 전체가 날아간다. */}
+          <Suspense
+            fallback={
+              <VStack align="center" paddingBlock={10}>
+                <Spinner size="lg" />
               </VStack>
-            </VStack>
-
-            {category && service && (
-              <FixedBottomCTA
-                label="다음으로"
-                onClick={() =>
-                  push("SubscribeNewPay", {
-                    category,
-                    service,
-                    // 직접 입력한 서비스는 code 가 없다. undefined 면 URL 에 실리지 않는다.
-                    ...(serviceCode ? { serviceCode } : {}),
-                  })
-                }
-              />
-            )}
-          </VStack>
+            }
+          >
+            <ServicePicker
+              onSelect={pushPay}
+              onSelectCategory={(category) =>
+                push("SubscribeNewCategory", { category })
+              }
+              onCustom={() => push("SubscribeNewCustom", {})}
+            />
+          </Suspense>
         </VStack>
-      </AppScreen>
-    </SubscribeContext.Provider>
+      </VStack>
+    </AppScreen>
   );
 };
 
