@@ -175,7 +175,7 @@ function SpendingSummary() {
                 {formatWon(monthly.totalAmount)}
               </Text>
               <SpendingComparison
-                currentAmount={monthly.totalAmount}
+                amount={monthly.totalAmount}
                 compared={
                   comparedMonth
                     ? { label: comparedLabel, amount: comparedMonth.amount }

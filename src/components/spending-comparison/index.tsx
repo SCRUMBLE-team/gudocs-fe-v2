@@ -1,41 +1,60 @@
 import { Text } from "@astryxdesign/core/Text";
 import { formatWon } from "../../utils/format";
 
-export type ComparedMonth = { label: string; amount: number };
+type ComparedMonth = { label: string; amount: number };
 
 /**
- * 이번 달과 비교 대상 달의 구독료 차이 문구.
+ * 두 달의 구독료 차이 문구.
  *
- * 홈 요약 카드와 지출 상세가 같이 쓴다. 어느 쪽이든 "이번 달"을 기준으로 두고
- * 고른 달과 견주므로, 비교 대상만 라벨로 받는다.
+ * 홈에서는 이번 달을 지난달·선택한 달과 비교하고, 지출 상세에서는 선택한 달을
+ * 실제 이번 달과 비교한다. 비교 기준의 라벨과 금액을 함께 받아 두 방향을 지원한다.
+ * 어느 화면이든 덜 쓴 금액은 accent, 더 쓴 금액은 red 토큰으로 표시한다.
  *
  * 라벨은 "지난달"이거나 "5월"처럼 항상 받침으로 끝나서 조사는 "과"로 고정된다.
  */
 function SpendingComparison({
-  currentAmount,
+  amount,
   compared,
+  isPast = false,
 }: {
-  currentAmount: number;
-  /** 비교할 달. 이번 달이 스택의 첫 달이라 비교 대상이 없으면 null */
-  compared: { label: string; amount: number } | null;
+  /** 화면에서 설명할 달의 지출 금액. */
+  amount: number;
+  /** 비교 기준이 되는 달. 비교할 내역이 없으면 null. */
+  compared: ComparedMonth | null;
+  /** 이미 끝난 달의 지출을 설명할 때 과거형 문구를 사용한다. */
+  isPast?: boolean;
 }) {
   if (!compared) {
     return <Text type="body">비교할 이전 내역이 없어요</Text>;
   }
 
-  const difference = currentAmount - compared.amount;
+  const difference = amount - compared.amount;
+  const ending = isPast ? "썼어요" : "쓰고 있어요";
 
   if (difference === 0) {
-    return <Text type="body">{compared.label}과 동일하게 쓰고 있어요</Text>;
+    return (
+      <Text type="body">
+        {compared.label}과 동일하게 {ending}
+      </Text>
+    );
   }
 
   return (
     <Text type="body">
       {compared.label}보다{" "}
-      <Text type="body" weight="bold" color="accent">
+      <Text
+        type="body"
+        weight="bold"
+        color={difference > 0 ? "inherit" : "accent"}
+        className={
+          difference > 0
+            ? "text-[var(--color-text-red)]"
+            : undefined
+        }
+      >
         {formatWon(Math.abs(difference))}
       </Text>{" "}
-      {difference > 0 ? "더" : "덜"} 쓰고 있어요
+      {difference > 0 ? "더" : "덜"} {ending}
     </Text>
   );
 }

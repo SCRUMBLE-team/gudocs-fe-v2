@@ -147,8 +147,12 @@ function TrendChart({
   trend,
   selected,
   onSelectMonth,
+  showCoachMark,
+  onDismissCoachMark,
 }: Pick<Props, "selected" | "onSelectMonth"> & {
   trend: ExpensesViewModel["trend"];
+  showCoachMark: boolean;
+  onDismissCoachMark: () => void;
 }) {
   const chartData = trend.map(({ year, month, totalAmount }) => {
     const isSelected = year === selected.year && month === selected.month;
@@ -156,6 +160,7 @@ function TrendChart({
       label: `${month}월`,
       amount: totalAmount,
       valueLabel: isSelected ? formatWon(totalAmount) : "",
+      coachMarkLabel: isSelected && showCoachMark ? "coach-mark" : "",
       fill: isSelected ? MONTHLY_FILL : YEARLY_FILL,
     };
   });
@@ -167,11 +172,11 @@ function TrendChart({
   };
 
   return (
-    <ResponsiveContainer width="100%" height={200}>
+    <ResponsiveContainer width="100%" height={220}>
       {/* 막대 자체는 얇을 수 있어서 차트에도 클릭을 걸어 열(column) 전체를 탭 영역으로 쓴다. */}
       <BarChart
         data={chartData}
-        margin={{ top: 24 }}
+        margin={{ top: 58 }}
         onClick={(state) => selectByIndex(state?.activeTooltipIndex)}
         style={{ cursor: "pointer" }}
       >
@@ -195,6 +200,12 @@ function TrendChart({
               fontWeight: "bold",
               fill: "var(--color-text-secondary)",
             }}
+          />
+          <LabelList
+            dataKey="coachMarkLabel"
+            content={(props) => (
+              <ChartCoachMark {...props} onDismiss={onDismissCoachMark} />
+            )}
           />
         </Bar>
       </BarChart>
@@ -307,17 +318,6 @@ function ExpensesView({
   } = model;
   const coachMark = useCoachMark();
 
-  const isCurrentSelected =
-    selected.year === current.year && selected.month === current.month;
-
-  // 이번 달을 보고 있으면 견줄 대상이 자기 자신이라 의미가 없다.
-  // 홈 카드와 같게 지난달을 기본 비교 대상으로 삼는다.
-  const comparedPeriod = isCurrentSelected ? addMonths(current, -1) : selected;
-  const comparedEntry = trend.find(
-    ({ year, month }) =>
-      year === comparedPeriod.year && month === comparedPeriod.month,
-  );
-
   // 막대를 누르면 안내를 본 것으로 친다.
   const selectMonth = (period: { year: number; month: number }) => {
     coachMark.dismiss();
@@ -362,17 +362,9 @@ function ExpensesView({
           {formatWon(totalAmount)}
         </Text>
         <SpendingComparison
-          currentAmount={currentAmount}
-          compared={
-            comparedEntry
-              ? {
-                  label: isCurrentSelected
-                    ? "지난달"
-                    : `${selected.month}월`,
-                  amount: comparedEntry.totalAmount,
-                }
-              : null
-          }
+          amount={totalAmount}
+          compared={{ label: "이번 달", amount: currentAmount }}
+          isPast={compareYearMonth(selected, current) < 0}
         />
       </VStack>
 
@@ -385,7 +377,6 @@ function ExpensesView({
         />
 
         <VStack
-          className="relative"
           onTouchStart={(event) => {
             const touch = event.touches[0];
             touchStart.current = touch
@@ -397,13 +388,12 @@ function ExpensesView({
             if (touch) handleTouchEnd(touch.clientX, touch.clientY);
           }}
         >
-          {coachMark.isVisible && (
-            <ChartCoachMark onDismiss={coachMark.dismiss} />
-          )}
           <TrendChart
             trend={trend}
             selected={selected}
             onSelectMonth={selectMonth}
+            showCoachMark={coachMark.isVisible}
+            onDismissCoachMark={coachMark.dismiss}
           />
         </VStack>
       </VStack>
