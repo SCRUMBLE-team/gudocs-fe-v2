@@ -130,7 +130,7 @@ function TabLayout({ children }: { children: ReactNode }) {
               <Icon
                 size="lg"
                 icon={AlarmIcon}
-                color={isEnabled ? "accent" : undefined}
+                color="accent"
               />
             }
             variant="ghost"
