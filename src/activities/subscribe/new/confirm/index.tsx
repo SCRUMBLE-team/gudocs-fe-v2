@@ -29,6 +29,7 @@ import { toSubscribePayload } from "../to-subscribe-payload";
 import CategoryField from "../funnel/category-field";
 import ServiceField from "../funnel/service-field";
 import PriceField from "../funnel/price-field";
+import ShareCountField from "../funnel/share-count-field";
 import BillingCycleField from "../funnel/billing-cycle-field";
 import BillingDateField from "../funnel/billing-date-field";
 
@@ -128,6 +129,8 @@ const SubscribeNewConfirmActivity: StaticActivityComponentType<
   const [serviceCode, setServiceCode] = useState(draft.serviceCode);
   const [billingCycle, setBillingCycle] = useState(draft.billingCycle);
   const [price, setPrice] = useState(draft.price);
+  // OCR은 몇 명이 나눠 내는지 알 수 없다. 비워둔 채로 두고 사용자가 짚어준다.
+  const [shareCount, setShareCount] = useState(0);
   const [paymentDate, setPaymentDate] = useState(draft.paymentDate);
   const [serviceResolution, setServiceResolution] =
     useState<ServiceResolution>(() =>
@@ -154,6 +157,8 @@ const SubscribeNewConfirmActivity: StaticActivityComponentType<
     onChangeBillingCycle: setBillingCycle,
     price,
     onChangePrice: setPrice,
+    shareCount,
+    onChangeShareCount: setShareCount,
     paymentDate,
     onChangePaymentDate: setPaymentDate,
   };
@@ -251,6 +256,7 @@ const SubscribeNewConfirmActivity: StaticActivityComponentType<
                       </>
                     )}
                     <PriceField />
+                    <ShareCountField />
                     <BillingCycleField />
                     <BillingDateField />
                   </VStack>
