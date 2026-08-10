@@ -129,30 +129,3 @@ export function clearStoredRegistrationId() {
   }
 }
 
-/*
- * 앱 진입 시 자동 권한 요청을 이미 했는지.
- *
- * 사용자가 프롬프트를 "무시"하면 권한이 default로 남아서 진입할 때마다 다시
- * 뜬다. Chrome은 이걸 3회 반복하면 사이트를 영구 차단해버리므로 자동 요청은
- * 기기당 한 번만 한다. 이후에는 벨 버튼(명시적 제스처)으로만 다시 물어본다.
- *
- * 권한 자체가 오리진 단위라 유저별로 나누지 않는다.
- */
-const AUTO_PROMPT_KEY = "gudocs.push.autoPrompted";
-
-export function hasAutoPrompted() {
-  try {
-    return localStorage.getItem(AUTO_PROMPT_KEY) === "true";
-  } catch {
-    // 읽을 수 없으면 물어본 적 있다고 쳐서 반복 프롬프트를 막는다.
-    return true;
-  }
-}
-
-export function markAutoPrompted() {
-  try {
-    localStorage.setItem(AUTO_PROMPT_KEY, "true");
-  } catch {
-    // 저장 실패는 삼킨다. 최악의 경우 다음 진입에 한 번 더 뜨는 정도다.
-  }
-}

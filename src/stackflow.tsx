@@ -13,6 +13,7 @@ import SubscribeActivity from "./activities/subscribe";
 import AnalyzeActivity from "./activities/analyze";
 import ExpensesActivity from "./activities/expenses";
 import MyActivity from "./activities/my";
+import NotificationActivity from "./activities/notification";
 import SavingsActivity from "./activities/savings";
 import SubscribeNewStartActivity from "./activities/subscribe/new/start";
 import SubscribeNewActivity from "./activities/subscribe/new";
@@ -48,6 +49,7 @@ export const { Stack } = stackflow({
     Analyze: withAuth(AnalyzeActivity),
     Expenses: withAuth(ExpensesActivity),
     My: withAuth(MyActivity),
+    Notification: withAuth(NotificationActivity),
     Savings: withAuth(SavingsActivity),
     SubscribeNewStart: withAuth(SubscribeNewStartActivity),
     SubscribeNew: withAuth(SubscribeNewActivity),
