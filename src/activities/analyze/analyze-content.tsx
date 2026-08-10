@@ -10,7 +10,10 @@ import { CATEGORY_META } from "../../constants/category";
 import { PIE_PALETTE, REST_COLOR } from "../../constants/category-palette";
 import { useCategoryExpensesQuery } from "../../hooks/query/useCategoryExpensesQuery";
 import { useMonthlyExpenseDetailQuery } from "../../hooks/query/useMonthlyExpensesDetailsQuery";
-import type { CategoryExpenseData, MonthlyDetailData } from "../../types/expenses";
+import type {
+  CategoryExpenseData,
+  MonthlyDetailData,
+} from "../../types/expenses";
 import type { SubscribeCategory } from "../../types/subscribe";
 import { formatWon } from "../../utils/format";
 import { useFlow } from "@stackflow/react";
@@ -142,7 +145,11 @@ function AnalyzeContent({ year, month }: { year: number; month: number }) {
             onMouseEnter={() => setHoveredKey(seg.key)}
             onMouseLeave={() => setHoveredKey(null)}
             className="min-w-1 transition-opacity hover:opacity-80"
-            style={{ flexGrow: seg.amount, flexBasis: 0, backgroundColor: seg.fill }}
+            style={{
+              flexGrow: seg.amount,
+              flexBasis: 0,
+              backgroundColor: seg.fill,
+            }}
           />
         ))}
       </HStack>
@@ -202,10 +209,6 @@ function AnalyzeContent({ year, month }: { year: number; month: number }) {
                 </HStack>
                 <Text className="text-[17px]" weight="bold">
                   {formatWon(seg.amount)}
-                  <Text type="supporting" color="secondary">
-                    {" "}
-                    · {toPercent(seg.amount)}%
-                  </Text>
                 </Text>
               </HStack>
 
