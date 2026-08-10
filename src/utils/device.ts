@@ -35,3 +35,25 @@ export function getDeviceName() {
 
   return `${browser} on ${os}`;
 }
+
+/**
+ * iOS 계열인지. 설치 안내 분기에 쓴다.
+ *
+ * iOS에는 beforeinstallprompt가 없어서 홈 화면 추가를 코드로 띄울 방법이 없다.
+ * iPadOS는 기본이 데스크톱 모드라 UA가 Mac으로 나오므로, 터치 포인트 수까지
+ * 봐야 아이패드를 놓치지 않는다.
+ */
+export function isIOS() {
+  const ua = navigator.userAgent;
+  return (
+    /iPhone|iPad|iPod/.test(ua) || (/Mac/.test(ua) && navigator.maxTouchPoints > 1)
+  );
+}
+
+/** 홈 화면에서 실행 중인지(= 이미 설치됨). iOS는 표준 display-mode 대신 navigator.standalone을 쓴다. */
+export function isStandalone() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}

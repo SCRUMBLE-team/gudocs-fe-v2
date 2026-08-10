@@ -1,18 +1,21 @@
+import { useState } from "react";
 import type { StaticActivityComponentType } from "@stackflow/react";
 import { useFlow } from "@stackflow/react";
 import { AppScreen } from "@stackflow/plugin-basic-ui";
 import { Avatar } from "@astryxdesign/core/Avatar";
 import { Card } from "@astryxdesign/core/Card";
-import { Divider } from "@astryxdesign/core/Divider";
 import { HStack } from "@astryxdesign/core/HStack";
-import { Item } from "@astryxdesign/core/Item";
-import { List } from "@astryxdesign/core/List";
+import { Icon } from "@astryxdesign/core/Icon";
+import { List, ListItem } from "@astryxdesign/core/List";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { useToast } from "@astryxdesign/core/Toast";
 import TabLayout from "../layout";
+import InstallGuideSheet from "./install-guide-sheet";
+import { APP_REVIEW_FORM_URL, SUPPORT_MAILTO } from "../../constants/links";
 import { useLogoutMutation } from "../../hooks/query/useLogoutMutation";
 import { useUserQuery } from "../../hooks/query/useUserQuery";
+import { useInstallPrompt } from "../../hooks/useInstallPrompt";
 import { usePushNotification } from "../../hooks/usePushNotification";
 
 const MyActivity: StaticActivityComponentType<"My"> = () => {
@@ -21,6 +24,8 @@ const MyActivity: StaticActivityComponentType<"My"> = () => {
   const showToast = useToast();
   const logoutMutation = useLogoutMutation();
   const { disable } = usePushNotification();
+  const { canPrompt, install } = useInstallPrompt();
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   async function handleLogout() {
     // 푸시 해제가 먼저다. DELETE /api/push-registrations는 세션 쿠키로
@@ -39,6 +44,14 @@ const MyActivity: StaticActivityComponentType<"My"> = () => {
         autoHideDuration: 3000,
       });
     }
+  }
+
+  function handleInstall() {
+    if (canPrompt) {
+      void install();
+      return;
+    }
+    setIsGuideOpen(true);
   }
 
   return (
@@ -60,17 +73,31 @@ const MyActivity: StaticActivityComponentType<"My"> = () => {
               </VStack>
             </HStack>
           </Card>
-          <Divider />
-          <List>
-            <Item
-              as="li"
-              density="spacious"
-              label="로그아웃"
-              onClick={handleLogout}
+
+          <List density="spacious" hasDividers>
+            {/* 네이티브 프롬프트를 쓸 수 없는 환경에서는 handleInstall이 수동 안내 시트를 연다. */}
+            <ListItem
+              label="홈 화면에 추가"
+              description="앱처럼 바로 열고 결제일 알림도 받아보세요"
+              endContent={<Icon icon="chevronRight" size="sm" />}
+              onClick={handleInstall}
             />
+            <ListItem
+              label="문의하기"
+              href={SUPPORT_MAILTO}
+              endContent={<Icon icon="chevronRight" size="sm" />}
+            />
+            <ListItem
+              label="앱 평가하기"
+              href={APP_REVIEW_FORM_URL}
+              target="_blank"
+              endContent={<Icon icon="externalLink" size="sm" />}
+            />
+            <ListItem label="로그아웃" onClick={handleLogout} />
           </List>
         </VStack>
       </TabLayout>
+      <InstallGuideSheet isOpen={isGuideOpen} onOpenChange={setIsGuideOpen} />
     </AppScreen>
   );
 };
