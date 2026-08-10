@@ -16,6 +16,7 @@ import {
   type SavingsSummary,
 } from "../../utils/savings";
 import EmptySubscription from "../home/empty-subscription";
+import FixedBottomCTA from "../../components/fixed-bottom-cta";
 
 const REMAINING_FILL = "var(--color-accent)";
 const SAVED_FILL = "var(--color-accent-muted)";
@@ -106,25 +107,11 @@ function SavingsSummaryHeader({
         )}
       </VStack>
 
-      {/*
-        구독료는 보조 정보로 내린다. 일시정지 안내도 이 숫자에 대한 설명이라
-        여기에 붙여야 무엇이 빠졌는지 바로 연결된다.
-
-        "이번 달 구독료"라고 부르면 홈 카드와 같은 값이어야 할 것 같은데 실제로는
-        다르다. 홈은 서버가 준 이번 달 지출이라 이 달에 일시정지한 구독도 (이미
-        결제가 나갔을 수 있어서) 포함되지만, 여기는 "앞으로 매달 나갈 돈"이라
-        일시정지를 뺀다. 이름을 바꿔 서로 다른 값임을 드러낸다.
-      */}
       <VStack gap={0.5}>
         <HStack justify="between" align="center">
           <Text type="supporting" color="secondary">
             매달 나가는 구독료
           </Text>
-          {/*
-            바뀐 금액은 취소선으로 보여준다. 화살표는 두 숫자를 나란히 읽게 만들어
-            어느 쪽이 결과인지 한 번 더 생각하게 하지만, 취소선은 지워진 쪽이
-            바로 보인다. 이 줄이 작아서 잘 안 보인다고 해서 크기도 한 단계 올렸다.
-          */}
           <HStack gap={1.5} align="center">
             {hasSelection && (
               <Text
@@ -222,7 +209,10 @@ function SavingsContent() {
                       size="sm"
                       className="pointer-events-none"
                     />
-                    <ServiceLogo name={row.serviceName} code={row.serviceCode} />
+                    <ServiceLogo
+                      name={row.serviceName}
+                      code={row.serviceCode}
+                    />
                   </HStack>
                 }
                 label={
@@ -261,6 +251,14 @@ function SavingsContent() {
           실제 정리는 구독 상세 화면에서 일시정지하거나 삭제할 수 있어요
         </Text>
       </VStack>
+      {selectedIds.size > 0 && (
+        <FixedBottomCTA
+          label="안 쓰는 구독 알림 받기"
+          onClick={() => {
+            /**todo */
+          }}
+        />
+      )}
     </VStack>
   );
 }
