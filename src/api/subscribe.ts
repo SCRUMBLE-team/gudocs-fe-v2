@@ -75,3 +75,17 @@ export async function changeSubscribeStatus({
   );
   return response.data;
 }
+
+export async function savingsSelection({
+  subscriptionIds,
+}: {
+  subscriptionIds: number[];
+}) {
+  const response = await http.put<ApiResponse<{ data: SubscriptionDetail[] }>>(
+    "/api/subscriptions/savings-selection",
+    {
+      subscriptionIds,
+    },
+  );
+  return response.data;
+}

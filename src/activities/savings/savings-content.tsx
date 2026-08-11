@@ -4,9 +4,11 @@ import { CheckboxInput } from "@astryxdesign/core/CheckboxInput";
 import { HStack } from "@astryxdesign/core/HStack";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
+import { useToast } from "@astryxdesign/core/Toast";
 import { useMemo, useState } from "react";
 import ServiceLogo from "../../components/service-logo";
 import { useMonthlyExpenseDetailQuery } from "../../hooks/query/useMonthlyExpensesDetailsQuery";
+import { useSavingsSelectionMutation } from "../../hooks/query/useSavingsSelectionMutation";
 import { useCountUp } from "../../hooks/useCountUp";
 import { getBaseYearMonth } from "../../utils/date";
 import { formatWon } from "../../utils/format";
@@ -142,6 +144,8 @@ function SavingsSummaryHeader({
 
 function SavingsContent() {
   const { data } = useMonthlyExpenseDetailQuery(getBaseYearMonth());
+  const showToast = useToast();
+  const savingsSelect = useSavingsSelectionMutation();
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<number>>(
     () => new Set(),
   );
@@ -161,6 +165,20 @@ function SavingsContent() {
       return next;
     });
   };
+
+  async function handleSubmit() {
+    try {
+      await savingsSelect.mutateAsync({ subscriptionIds: [...selectedIds] });
+      showToast({ body: "알림을 설정했어요" });
+    } catch {
+      showToast({
+        body: "설정에 실패했어요. 잠시 후 다시 시도해주세요.",
+        type: "error",
+        isAutoHide: true,
+        autoHideDuration: 3000,
+      });
+    }
+  }
 
   if (rows.length === 0) {
     return (
@@ -254,9 +272,8 @@ function SavingsContent() {
       {selectedIds.size > 0 && (
         <FixedBottomCTA
           label="안 쓰는 구독 알림 받기"
-          onClick={() => {
-            /**todo */
-          }}
+          onClick={() => void handleSubmit()}
+          isDisabled={savingsSelect.isPending}
         />
       )}
     </VStack>

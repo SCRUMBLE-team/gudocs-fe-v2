@@ -240,6 +240,14 @@ function SubscriptionDetailContent({ id }: { id: string }) {
             서비스에서 먼저 해지해주세요.
           </Text>
           <Button
+            label="해지 링크로 넘어가기"
+            variant="primary"
+            size="lg"
+            onClick={() =>
+              window.open(data.cancelUrl, "_blank", "noopener,noreferrer")
+            }
+          />
+          <Button
             label="네, 삭제할게요"
             variant="destructive"
             size="lg"

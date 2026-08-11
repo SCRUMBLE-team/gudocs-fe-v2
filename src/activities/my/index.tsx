@@ -12,7 +12,7 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { useToast } from "@astryxdesign/core/Toast";
 import TabLayout from "../layout";
 import InstallGuideSheet from "./install-guide-sheet";
-import { APP_REVIEW_FORM_URL, SUPPORT_MAILTO } from "../../constants/links";
+import { APP_REVIEW_FORM_URL, OPEN_KAKAO_URL } from "../../constants/links";
 import { useLogoutMutation } from "../../hooks/query/useLogoutMutation";
 import { useUserQuery } from "../../hooks/query/useUserQuery";
 import { useInstallPrompt } from "../../hooks/useInstallPrompt";
@@ -84,7 +84,8 @@ const MyActivity: StaticActivityComponentType<"My"> = () => {
             />
             <ListItem
               label="문의하기"
-              href={SUPPORT_MAILTO}
+              href={OPEN_KAKAO_URL}
+              target="_blank"
               endContent={<Icon icon="chevronRight" size="sm" />}
             />
             <ListItem
