@@ -12,6 +12,7 @@ import { toSubscribePayload } from "../../new/to-subscribe-payload";
 import CategoryField from "../../new/funnel/category-field";
 import ServiceField from "../../new/funnel/service-field";
 import PriceField from "../../new/funnel/price-field";
+import ShareCountField from "../../new/funnel/share-count-field";
 import BillingCycleField from "../../new/funnel/billing-cycle-field";
 import BillingDateField from "../../new/funnel/billing-date-field";
 import { useSubscriptionQuery } from "../../../../hooks/query/useSubscriptionQuery";
@@ -30,6 +31,10 @@ function EditForm({ id }: { id: string }) {
   );
   const [billingCycle, setBillingCycle] = useState(data.billingCycle);
   const [price, setPrice] = useState<number | null>(data.price);
+  // 저장된 price는 이미 나뉜 내 몫이다. 인원수는 서버에 남지 않으므로 빈 칸으로
+  // 시작하고, 손대지 않으면 저장 시 그대로 유지된다.
+  // 값을 넣으면 지금 보이는 금액을 다시 나눈다 — 안내 문구가 그 결과를 못박는다.
+  const [shareCount, setShareCount] = useState(0);
   const [paymentDate, setPaymentDate] = useState<Date | null>(
     fromISODate(data.firstBillingDate),
   );
@@ -47,6 +52,8 @@ function EditForm({ id }: { id: string }) {
     onChangeBillingCycle: setBillingCycle,
     price,
     onChangePrice: setPrice,
+    shareCount,
+    onChangeShareCount: setShareCount,
     paymentDate,
     onChangePaymentDate: setPaymentDate,
   };
@@ -87,6 +94,7 @@ function EditForm({ id }: { id: string }) {
             <CategoryField />
             <ServiceField />
             <PriceField />
+            <ShareCountField />
             <BillingCycleField />
             <BillingDateField />
           </VStack>

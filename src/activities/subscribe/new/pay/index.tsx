@@ -23,6 +23,7 @@ import { toSubscribePayload } from "../to-subscribe-payload";
 import { useFunnelFlow } from "../use-funnel-flow";
 import PlanField from "../funnel/plan-field";
 import PriceField from "../funnel/price-field";
+import ShareCountField from "../funnel/share-count-field";
 import BillingCycleField from "../funnel/billing-cycle-field";
 import BillingDateField from "../funnel/billing-date-field";
 
@@ -46,6 +47,8 @@ function PayForm({ category, service, serviceCode }: PayFormProps) {
 
   const [billingCycle, setBillingCycle] = useState(seed?.billingCycle ?? null);
   const [price, setPrice] = useState<number | null>(seed?.price ?? null);
+  // 0 = 안 정함. 대부분 혼자 내므로 비워둔 채로 시작한다.
+  const [shareCount, setShareCount] = useState(0);
   const [paymentDate, setPaymentDate] = useState<Date | null>(null);
 
   const showToast = useToast();
@@ -64,6 +67,8 @@ function PayForm({ category, service, serviceCode }: PayFormProps) {
     onChangeBillingCycle: setBillingCycle,
     price,
     onChangePrice: setPrice,
+    shareCount,
+    onChangeShareCount: setShareCount,
     paymentDate,
     onChangePaymentDate: setPaymentDate,
   };
@@ -118,6 +123,7 @@ function PayForm({ category, service, serviceCode }: PayFormProps) {
           <VStack gap={2}>
             <PlanField />
             <PriceField />
+            <ShareCountField />
             <BillingCycleField />
             <BillingDateField />
           </VStack>

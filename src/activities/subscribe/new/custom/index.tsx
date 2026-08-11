@@ -58,7 +58,6 @@ const SubscribeNewCustomActivity: StaticActivityComponentType<
               placeholder="서비스명"
               value={service}
               onChange={setService}
-              hasAutoFocus
             />
           </VStack>
 

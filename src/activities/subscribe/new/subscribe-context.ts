@@ -22,6 +22,14 @@ export type SubscribeContextValue = {
   onChangeBillingCycle: (value: BillingCycle) => void;
   price: number | null;
   onChangePrice: (value: number | null) => void;
+  /**
+   * 나눠 내는 인원. 1이면 나누지 않는다.
+   *
+   * 저장되는 값이 아니라 계산기다. 서버에 분할을 담을 필드가 없어서
+   * to-subscribe-payload가 price를 이 수로 나눠 내 몫만 보낸다.
+   */
+  shareCount: number;
+  onChangeShareCount: (value: number) => void;
   paymentDate: Date | null;
   // DateInput은 선택 해제를 지원하므로 null도 받는다.
   onChangePaymentDate: (value: Date | null) => void;

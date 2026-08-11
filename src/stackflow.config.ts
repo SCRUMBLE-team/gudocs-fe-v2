@@ -20,6 +20,7 @@ export const config = defineConfig({
     { name: "Analyze", route: "/analyze" },
     { name: "Expenses", route: "/expenses" },
     { name: "My", route: "/my" },
+    { name: "Notification", route: "/notification" },
     { name: "Savings", route: "/savings" },
     { name: "SubscribeNewStart", route: "/subscribe/new" },
     { name: "SubscribeNew", route: "/subscribe/new/service" },
@@ -43,6 +44,7 @@ declare module "@stackflow/config" {
     Analyze: Record<string, never>;
     Expenses: Record<string, never>;
     My: Record<string, never>;
+    Notification: Record<string, never>;
     Savings: Record<string, never>;
     SubscribeNewStart: Record<string, never>;
     SubscribeNew: Record<string, never>;

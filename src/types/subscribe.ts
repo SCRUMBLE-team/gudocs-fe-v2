@@ -45,6 +45,7 @@ export interface SubscriptionDetail {
   nextBillingDate: string;
   createdAt: string;
   updatedAt: string;
+  cancelUrl: string;
 }
 
 /**

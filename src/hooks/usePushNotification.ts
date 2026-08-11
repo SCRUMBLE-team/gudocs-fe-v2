@@ -2,8 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import {
   clearStoredRegistrationId,
   getPushPermission,
-  hasAutoPrompted,
-  markAutoPrompted,
   readStoredRegistrationId,
   requestPushRegistration,
   revokePushRegistration,
@@ -12,16 +10,12 @@ import {
 import { useUnregisterPushMutation } from "./query/useUnregisterPushMutation";
 import { useUserQuery } from "./query/useUserQuery";
 
-/*
- * 자동 등록을 끝낸 유저. 훅 인스턴스가 아니라 모듈에 둔다.
- *
- * 이 훅은 TabLayout과 마이 화면에서 동시에 쓰인다. 인스턴스별 ref로 막으면
- * 마이 탭에서 두 인스턴스가 각자 한 번씩 register()를 부른다.
- */
-let autoRegisteredUserId: number | null = null;
-
 /**
  * 푸시 알림 권한을 관리한다.
+ *
+ * 자동 등록은 하지 않는다. 권한 요청은 알림 화면(activities/notification)의
+ * 버튼에서만 시작한다 — 맥락 없이 뜬 프롬프트는 거절당하기 쉽고, 한번 거절되면
+ * 코드로 다시 띄울 방법이 없다.
  *
  * FID를 서버에 올리는 건 여기가 아니라 components/push-bridge.tsx다.
  * register()는 등록을 시작만 하고 FID는 onRegistered 콜백으로 오기 때문에,
@@ -35,34 +29,40 @@ export function usePushNotification() {
     useState<PushPermission>(getPushPermission);
   const [isPending, setIsPending] = useState(false);
 
-  /**
-   * 권한 요청 → FCM 등록 시작. 진행 상태는 건드리지 않는다.
+  /*
+   * 브라우저 설정에서 권한을 바꾸고 돌아오는 경로를 따라간다.
    *
-   * 자동 등록은 사용자가 기다리는 작업이 아니라서 버튼을 잠글 필요가 없다.
-   * isPending을 여기서 세우면 이펙트가 렌더 직후 상태를 밀어 연쇄 렌더가 된다.
+   * 차단 상태를 풀려면 앱을 떠나 설정을 만져야 하는데, 그동안 알림 화면은
+   * 스택에 그대로 살아 있어서 초기값이 낡은 채로 남는다. 돌아왔을 때 여전히
+   * "차단돼 있어요"가 떠 있으면 사용자는 자기가 뭘 잘못했다고 생각한다.
    */
-  const runRegistration = useCallback(async () => {
-    try {
-      const ok = await requestPushRegistration();
-      setPermission(getPushPermission());
-      return ok;
-    } catch (error) {
-      // VAPID 키 불일치, SW 등록 실패 등이 여기로 온다.
-      console.warn("[push] 알림을 켜지 못했어요", error);
-      setPermission(getPushPermission());
-      return false;
-    }
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        setPermission(getPushPermission());
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", onVisibilityChange);
   }, []);
 
-  /** 벨 버튼용. 사용자가 기다리는 경로라 진행 상태를 세운다. */
+  /** 알림 화면의 CTA용. 사용자가 기다리는 경로라 진행 상태를 세운다. */
   const enable = useCallback(async () => {
     setIsPending(true);
     try {
-      return await runRegistration();
+      return await requestPushRegistration();
+    } catch (error) {
+      // VAPID 키 불일치, SW 등록 실패 등이 여기로 온다.
+      console.warn("[push] 알림을 켜지 못했어요", error);
+      return false;
     } finally {
+      // 성공이든 실패든 프롬프트 결과가 권한에 반영됐을 수 있다.
+      setPermission(getPushPermission());
       setIsPending(false);
     }
-  }, [runRegistration]);
+  }, []);
 
   /**
    * 로그아웃용. 서버 등록을 지우고 이 기기의 FID 등록도 해제한다.
@@ -82,8 +82,6 @@ export function usePushNotification() {
 
       await revokePushRegistration();
       clearStoredRegistrationId();
-      // 같은 유저가 다시 로그인하면 자동 등록이 다시 돌아야 한다.
-      autoRegisteredUserId = null;
       return true;
     } catch (error) {
       console.warn("[push] 알림을 끄지 못했어요", error);
@@ -92,39 +90,6 @@ export function usePushNotification() {
       setIsPending(false);
     }
   }, [user, unregisterPush]);
-
-  /*
-   * 앱 진입 시 자동 등록. 로그인 상태에서 유저당 한 번만 돈다.
-   *
-   * 권한이 이미 granted여도 register()를 다시 부른다. SDK가 FID 등록을
-   * 갱신해주고, 서버 반영은 onRegistered를 타고 push-bridge가 처리한다.
-   *
-   * 권한이 default면 여기서 프롬프트를 띄우되 기기당 1회로 제한한다.
-   * 무시당한 프롬프트를 반복하면 브라우저가 영구 차단으로 처리한다.
-   *
-   * iOS Safari와 Firefox는 사용자 제스처 밖에서 온 requestPermission()을
-   * 무시한다. 그 환경에서는 이 자동 요청이 조용히 실패하고, 벨 버튼이
-   * 유일한 진입점으로 남는다.
-   */
-  useEffect(() => {
-    if (!user) return;
-    if (autoRegisteredUserId === user.id) return;
-
-    const permissionNow = getPushPermission();
-    if (permissionNow === "unsupported" || permissionNow === "denied") return;
-
-    if (permissionNow !== "granted") {
-      if (hasAutoPrompted()) return;
-      markAutoPrompted();
-    }
-
-    autoRegisteredUserId = user.id;
-
-    // queueMicrotask로 미루는 건 커밋이 끝난 뒤에 등록을 시작하기 위해서다.
-    // 직접 호출하면 첫 await 전까지가 이펙트의 동기 구간에서 돌고, 이어지는
-    // setState가 연쇄 렌더로 이어진다(react-hooks/set-state-in-effect).
-    queueMicrotask(() => void runRegistration());
-  }, [user, runRegistration]);
 
   return {
     /** 브라우저 알림 권한이 허용된 상태 */
