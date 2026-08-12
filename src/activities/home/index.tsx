@@ -7,6 +7,7 @@ import SpendingSummary from "./spending-summary";
 import SubscriptionCard from "./subscription-card";
 import AnalyzeExpenses from "./analyze-expenses";
 import SavingsInvite from "./savings-invite";
+import PriceChangeBanner from "./price-change-banner";
 
 const HomeActivity: StaticActivityComponentType<"Home"> = () => {
   return (
@@ -14,6 +15,10 @@ const HomeActivity: StaticActivityComponentType<"Home"> = () => {
     <AppScreen preventSwipeBack>
       <TabLayout>
         <VStack padding={4} gap={3}>
+          {/* 경고성 안내라 첫 화면 맨 위에 둔다. 예고가 없으면 스스로 사라진다. */}
+          <Suspense>
+            <PriceChangeBanner />
+          </Suspense>
           <Suspense>
             <SubscriptionCard />
           </Suspense>

@@ -43,6 +43,15 @@ export function toDayOfMonth(iso: string) {
 }
 
 /**
+ * "YYYY-MM-DD" -> "9월 1일".
+ * toDayOfMonth와 같은 이유로 Date를 거치지 않는다. 타임존 때문에 하루 밀린다.
+ */
+export function formatMonthDay(iso: string) {
+  const [, month, day] = iso.split("-");
+  return `${Number(month)}월 ${Number(day)}일`;
+}
+
+/**
  * Date -> "YYYY-MM-DD".
  * toISOString()은 UTC로 변환하므로 한국 시간 자정 근처에서 날짜가 하루
  * 밀린다. 로컬 기준 연·월·일을 그대로 조합한다.

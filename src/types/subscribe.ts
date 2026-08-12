@@ -26,7 +26,24 @@ export type CreateSubscribePayload = {
 };
 
 /**
- * 서버 응답. 요청 본문에 없는 서버 파생 필드(id·status·paymentMethod·nextBillingDate 등)가
+ * 서비스가 공지한 구독료 변경 예고.
+ *
+ * 사용자가 등록해둔 금액과 실제로 빠져나갈 금액이 달라지는 상황이라, 적용일 전에
+ * 알려주는 게 이 서비스의 핵심 목적(결제 사고 방지)에 그대로 걸린다.
+ */
+export type PriceChange = {
+  oldPrice: number;
+  newPrice: number;
+  /** 새 가격이 적용되는 날. "YYYY-MM-DD" */
+  effectiveOn: string;
+  /** 서비스가 변경을 공지한 날. "YYYY-MM-DD" */
+  announcedOn: string;
+  /** 공지 원문 링크 */
+  sourceUrl: string;
+};
+
+/**
+ * 서버 응답. 요청 본문에 없는 서버 파생 필드(id·status·nextBillingDate 등)가
  * 붙으므로 CreateSubscribePayload를 상속하지 않고 따로 선언한다.
  */
 export interface SubscriptionDetail {
@@ -39,10 +56,17 @@ export interface SubscriptionDetail {
   billingCycle: BillingCycle;
   /** "YYYY-MM-DD" */
   firstBillingDate: string;
-  paymentMethod: PaymentMethod;
+  /** 목록 응답에는 내려오지 않는다. 화면에서 읽는 곳도 없어 선택 필드로 둔다. */
+  paymentMethod?: PaymentMethod;
   status: SubscribeStatus;
   /** 서버가 계산한 다음 결제 예정일. "YYYY-MM-DD" */
   nextBillingDate: string;
+  /** 예고된 구독료 변경. 예고가 없으면 null이다. */
+  priceChange: PriceChange | null;
+  /** 실제 결제 금액을 사용자가 확인해줘야 하는 상태인지 */
+  priceReviewRequired: boolean;
+  /** 구독 정리(절약 계산)에서 선택해둔 항목인지 */
+  savingsSelected: boolean;
   createdAt: string;
   updatedAt: string;
   cancelUrl: string;
