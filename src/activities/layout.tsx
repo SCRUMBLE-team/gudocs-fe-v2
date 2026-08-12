@@ -3,8 +3,9 @@ import { useActivity, useFlow, useStack } from "@stackflow/react";
 import Fab from "../components/fab";
 import { TabBar } from "../components/tab-bar";
 import { ROOT_TAB, TABS, type TabActivity } from "../constants/menus";
-import { HStack, IconButton, Text, Icon, VStack } from "@astryxdesign/core";
+import { HStack, IconButton, Icon, VStack } from "@astryxdesign/core";
 import { AlarmIcon } from "./home/tab-icons";
+import logo from "../assets/logo/logo.png";
 
 /** 탭 전환 뒤 최상단으로 올려야 할 화면. Stackflow가 이전 탭을 복원할 때도 유지한다. */
 let pendingScrollTarget: TabActivity | null = null;
@@ -71,9 +72,7 @@ function TabLayout({ children }: { children: ReactNode }) {
             onClick={() => goTab(ROOT_TAB)}
             className="transition-transform active:scale-95"
           >
-            <Text className="text-2xl" weight="bold" color="accent">
-              Gudocs
-            </Text>
+            <img src={logo} alt="" className="h-16 w-auto" />
           </HStack>
           {/* 여기서 권한을 직접 요청하지 않는다. 왜 필요한지 설명하는 알림 화면으로 보낸다. */}
           <IconButton
