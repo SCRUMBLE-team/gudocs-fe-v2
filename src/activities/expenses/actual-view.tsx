@@ -3,11 +3,14 @@ import { useMonthlyExpenseQuery } from "../../hooks/query/useMonthlyExpenseQuery
 import { useMonthlyExpensesQueries } from "../../hooks/query/useMonthlyExpensesQueries";
 import { useMonthlyExpenseDetailQuery } from "../../hooks/query/useMonthlyExpensesDetailsQuery";
 import {
+  compareYearMonth,
   getTodayDayOfMonth,
   toDayOfMonth,
+  toYearMonth,
   type YearMonth,
 } from "../../utils/date";
 import { useSubscriptionsQuery } from "../../hooks/query/useSubscriptionsQuery";
+import type { SubscriptionDetail } from "../../types/subscribe";
 import {
   earliestSubscribedMonth,
   isBilledIn,
@@ -24,6 +27,47 @@ type Props = {
   selected: YearMonth;
   onSelectMonth: (period: YearMonth) => void;
 };
+
+/**
+ * 상세 응답에 없는 구독을 0원 행으로 되살린다.
+ *
+ * 일시정지한 구독은 그 달 청구 기록이 없어 상세 응답에 아예 담기지 않는다.
+ * 그대로 두면 목록에서 구독이 통째로 사라져서, 사용자에게는 등록해둔 구독이
+ * 없어진 것처럼 보인다. 금액이 0이라 일자 그룹 합계도 총액도 그대로다.
+ *
+ * 이번 달에만 한다. 지난 달에 대해서는 그때 정지 상태였는지 알 방법이 없고
+ * (paused_at은 마지막 정지 시각 하나뿐이라 재개하면 지워진다), 오늘 상태로
+ * 과거를 단정하는 건 일자 합계에서 정지분을 빼던 것과 같은 종류의 버그다.
+ *
+ * 삭제된 구독은 따로 거르지 않아도 된다. 이 목록(GET /api/subscriptions)에는
+ * 애초에 내려오지 않고, 상세 응답에 deleted로 남아 있는 건 아래 billedIds에
+ * 이미 들어 있어 다시 붙지 않는다.
+ */
+function missingSubscriptionRows(
+  subscriptions: SubscriptionDetail[],
+  /** 그 달 상세 응답에 담겨 있던 구독 id. 여기 있으면 되살릴 필요가 없다. */
+  billedIds: Set<number>,
+  month: YearMonth,
+): ExpenseRow[] {
+  return subscriptions
+    .filter((item) => !billedIds.has(item.id))
+    // 그 달보다 뒤에 시작하는 구독은 그때 존재하지도 않았다. 유령 행이 된다.
+    // (createdAt은 "2026-03-15T10:00:00" 꼴이지만 toYearMonth는 앞 두 칸만 본다.)
+    .filter(
+      (item) =>
+        compareYearMonth(toYearMonth(item.firstBillingDate), month) <= 0 &&
+        compareYearMonth(toYearMonth(item.createdAt), month) <= 0,
+    )
+    .map((item) => ({
+      subscriptionId: item.id,
+      serviceName: item.serviceName,
+      serviceCode: item.serviceCode,
+      billingCycle: item.billingCycle,
+      amount: 0,
+      day: toDayOfMonth(item.firstBillingDate),
+      isPaused: item.status === "PAUSED",
+    }));
+}
 
 /**
  * 실제 청구 기준.
@@ -63,7 +107,7 @@ function ActualView({
     totalAmount: results[index].data.actualAmount,
   }));
 
-  const rows: ExpenseRow[] = detail.subscriptions
+  const billedRows: ExpenseRow[] = detail.subscriptions
     .filter(isListed)
     .filter((item) => isBilledIn(item, selected.month))
     .map((item) => ({
@@ -77,10 +121,30 @@ function ActualView({
       isPaused: isPaused(item),
     }));
 
+  /*
+   * 되살리는 기준은 상세 응답에 id가 있었는지다. billedRows가 아니라
+   * detail.subscriptions 전체로 판단해야 한다 — 이 달에 청구되지 않는 연간
+   * 구독은 응답에는 있지만 isBilledIn에서 걸러진 것이라, 0원 행으로 되붙이면
+   * "실제 청구" 목록에 청구도 없는 행이 새로 생긴다.
+   */
+  const isCurrentMonth = compareYearMonth(selected, current) === 0;
+  const rows = isCurrentMonth
+    ? [
+        ...billedRows,
+        ...missingSubscriptionRows(
+          subscriptions,
+          new Set(detail.subscriptions.map((item) => item.subscriptionId)),
+          selected,
+        ),
+      ]
+    : billedRows;
+
   // 이번 달에 앞으로 더 빠져나갈 돈. 결제일이 오늘보다 뒤인 항목만 센다.
-  // (일시정지는 결제가 나가지 않으므로 뺀다. rows는 이미 이 달 청구분만 담고 있다.)
+  // 여기는 지나간 청구가 아니라 앞으로의 예정액이라 정지분을 빼는 게 맞다.
+  // 0원으로 되살린 행은 금액이 없어 어차피 영향이 없지만, 의도를 분명히 하려고
+  // 이 달 청구분(billedRows)만 본다.
   const today = getTodayDayOfMonth();
-  const upcomingAmount = rows
+  const upcomingAmount = billedRows
     .filter((row) => !row.isPaused && row.day > today)
     .reduce((sum, row) => sum + row.amount, 0);
 

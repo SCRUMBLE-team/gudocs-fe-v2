@@ -28,7 +28,12 @@ export type ExpenseRow = {
   note?: string;
   /** 결제일(일). 일자별 그룹핑에 쓴다. */
   day: number;
-  /** 일시정지된 구독. 결제가 나가지 않으므로 흐리게 그리고 합계에서 뺀다. */
+  /**
+   * 지금 이 순간 일시정지 상태인 구독. 흐리게 그리고 뱃지를 다는 표시용이다.
+   *
+   * 금액 계산에 쓰면 안 된다. 이 값은 그 달의 상태가 아니라 오늘의 상태라서,
+   * 6월에 정상 청구된 구독이 오늘 정지됐다는 이유로 6월 합계에서 빠진다.
+   */
   isPaused: boolean;
 };
 
@@ -247,10 +252,17 @@ function ExpenseList({ rows, month }: { rows: ExpenseRow[]; month: number }) {
       .map(([day, items]) => ({
         day,
         items,
-        // 일시정지 구독은 실제로 빠져나가지 않으므로 그 날 합계에서 뺀다.
-        total: items
-          .filter((item) => !item.isPaused)
-          .reduce((sum, item) => sum + item.amount, 0),
+        /*
+         * 목록에 있는 금액을 그대로 더한다. 행이 있다는 것 자체가 그 달에 청구
+         * 기록이 있다는 뜻이다 — 정지 중이던 달은 애초에 목록에 안 나오고,
+         * 이번 달 예정분도 서버가 정지 구독을 건너뛴다.
+         *
+         * 전에는 isPaused인 행을 뺐는데, 그 값은 그 달이 아니라 오늘의 상태라
+         * 6월에 청구된 구독이 오늘 정지됐다는 이유로 6월 합계에서 빠졌다.
+         * "6월 10일 · 0원" 아래에 2,400원짜리 행이 놓이고, 서버가 준 그 달
+         * 총액과 일자별 합계의 총합도 어긋났다.
+         */
+        total: items.reduce((sum, item) => sum + item.amount, 0),
       }));
   }, [rows]);
 
