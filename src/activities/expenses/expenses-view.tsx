@@ -46,6 +46,19 @@ export type ExpensesViewModel = {
   rows: ExpenseRow[];
   /** 구독을 처음 등록한 달. 기간을 과거로 옮길 수 있는 하한이다. */
   earliestMonth: YearMonth | null;
+  /**
+   * 이번 달을 보고 있을 때 쓸 문구 재료.
+   *
+   * 비교 문구의 기준이 늘 "이번 달"이라, 이번 달을 고르면 자기 자신과 비교해
+   * "이번 달과 동일하게 쓰고 있어요"라는 뜻 없는 문장이 나온다. 기준마다 이 달에
+   * 대해 할 수 있는 말이 달라서 재료만 받고 문장은 화면이 만든다.
+   *
+   * UPCOMING — 실제 청구. 오늘 이후 남은 결제 합계.
+   * PREVIOUS — 월 환산. 월 환산액에는 "결제 예정"이 없으니 지난달과 비교한다.
+   */
+  currentMonthNote:
+    | { kind: "UPCOMING"; amount: number }
+    | { kind: "PREVIOUS"; amount: number };
 };
 
 type Props = {
@@ -299,6 +312,28 @@ function ExpenseList({ rows, month }: { rows: ExpenseRow[]; month: number }) {
   );
 }
 
+/**
+ * 실제 청구 기준으로 이번 달을 볼 때의 문구.
+ *
+ * 이번 달은 아직 진행 중이라, 지나간 결제보다 앞으로 빠져나갈 돈이 궁금하다.
+ * 결제일이 오늘 이후인 항목들의 합을 알려준다.
+ */
+function UpcomingBilling({ amount }: { amount: number }) {
+  if (amount === 0) {
+    return <Text type="body">이번 달 결제는 모두 끝났어요</Text>;
+  }
+
+  return (
+    <Text type="body">
+      이번 달에{" "}
+      <Text type="body" weight="bold" color="accent">
+        {formatWon(amount)}
+      </Text>{" "}
+      더 결제 예정이에요
+    </Text>
+  );
+}
+
 /** 스와이프로 인정할 최소 가로 이동 거리(px). 세로 스크롤과 헷갈리지 않게 둔다. */
 const SWIPE_THRESHOLD = 48;
 
@@ -320,6 +355,7 @@ function ExpensesView({
     trend,
     rows,
     earliestMonth,
+    currentMonthNote,
   } = model;
   const coachMark = useCoachMark();
   const [pendingSelected, setPendingSelected] = useState<YearMonth | null>(null);
@@ -327,6 +363,7 @@ function ExpensesView({
   // 월별 합계는 차트 데이터에 이미 있으므로 API 응답을 기다리지 않고 선택과 금액을
   // 먼저 반영한다. 구성·목록 같은 상세 데이터는 기존 transition 안에서 이어서 바뀐다.
   const displayedSelected = pendingSelected ?? selected;
+  const isCurrentMonth = compareYearMonth(displayedSelected, current) === 0;
   const displayedTotalAmount =
     trend.find(
       ({ year, month }) =>
@@ -383,11 +420,26 @@ function ExpensesView({
         <Text type="display-3" weight="bold" hasTabularNumbers>
           {formatWon(displayedTotalAmount)}
         </Text>
-        <SpendingComparison
-          amount={displayedTotalAmount}
-          compared={{ label: "이번 달", amount: currentAmount }}
-          isPast={compareYearMonth(displayedSelected, current) < 0}
-        />
+        {/*
+          이번 달을 보고 있으면 "이번 달과 비교"가 성립하지 않는다.
+          기준별로 이 달에 대해 할 수 있는 말을 대신 보여준다.
+        */}
+        {isCurrentMonth ? (
+          currentMonthNote.kind === "UPCOMING" ? (
+            <UpcomingBilling amount={currentMonthNote.amount} />
+          ) : (
+            <SpendingComparison
+              amount={displayedTotalAmount}
+              compared={{ label: "지난달", amount: currentMonthNote.amount }}
+            />
+          )
+        ) : (
+          <SpendingComparison
+            amount={displayedTotalAmount}
+            compared={{ label: "이번 달", amount: currentAmount }}
+            isPast={compareYearMonth(displayedSelected, current) < 0}
+          />
+        )}
       </VStack>
 
       <VStack gap={2}>

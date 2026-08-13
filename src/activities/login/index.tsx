@@ -58,9 +58,20 @@ const LoginActivity: StaticActivityComponentType<"Login"> = () => {
             type="display-3"
             weight="bold"
             justify="center"
-            className="whitespace-pre-line"
+            // break-keep이 없으면 한 줄이 폭을 넘길 때 "시작하세 / 요"처럼
+            // 어절 중간에서 끊긴다. 한글 기본 줄바꿈이 글자 단위라서다.
+            //
+            // display-3의 기본 크기(gudocs 테마에서 40px)로는 첫 줄이 좁은
+            // 기기에서 넘쳐 "모아"만 홀로 다음 줄로 떨어진다. 360px 폭에서도
+            // 두 줄로 앉도록 한 단계 낮춘다.
+            //
+            // size prop은 안 먹는다. 생성된 테마의 .astryx-text.display-3이
+            // astryx-theme 레이어에서 font-size를 다시 잡는데, size가 만드는
+            // stylex 클래스는 그보다 앞선 레이어라 진다. utilities 레이어가
+            // 맨 뒤라 여기서 토큰으로 지정한다.
+            className="whitespace-pre-line break-keep text-[length:var(--font-size-2xl)]"
           >
-            {"똑똑한 구독\nGudocs로 시작하세요"}
+            {"구독 관리, 한 번에\ngudocs로 시작하세요"}
           </Text>
         </VStack>
 
