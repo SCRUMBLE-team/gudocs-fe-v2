@@ -14,7 +14,7 @@ import { neutralTheme } from "@astryxdesign/theme-neutral";
  * 그대로 쓰면 대비가 3.5:1까지 떨어져 본문 기준(4.5:1)에 미달한다.
  *
  * 대비 검증 (light):
- *   흰색 on #0064FF      → 4.92:1  (본문 AA 통과)
+ *   흰색 on #1F4DF3      → 6.15:1  (본문 AA 통과)
  *   #202632 on #FCFCFF   → 14.8:1  (AAA 통과)
  */
 export const gudocsTheme = defineTheme({
@@ -22,7 +22,7 @@ export const gudocsTheme = defineTheme({
   extends: neutralTheme,
 
   color: {
-    accent: "#0064FF", // Toss Blue
+    accent: "#1F4DF3", // 브랜드 블루
     neutralStyle: "cool",
   },
 
@@ -47,7 +47,7 @@ export const gudocsTheme = defineTheme({
   radius: { base: 6, multiplier: 1 },
 
   tokens: {
-    "--color-accent": ["#0064FF", "#C2C0FF"],
+    "--color-accent": ["#1F4DF3", "#C9BEFF"],
     "--color-text-primary": ["#202632", "#E2E1EB"], // Toss Gray
 
     // 테두리·구분선도 Toss Gray 기준으로. 시스템 기본값과 동일한 알파 방식을
