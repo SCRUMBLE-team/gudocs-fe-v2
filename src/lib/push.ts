@@ -35,17 +35,21 @@ export function getPushPermission(): PushPermission {
 }
 
 /**
- * 권한을 받고 이 기기를 FCM에 등록한다. 성공하면 true.
+ * 이미 허용된 권한으로 이 기기를 FCM에 등록한다. 성공하면 true.
+ *
+ * 프롬프트를 띄우지 않으므로 앱이 뜰 때 그냥 불러도 된다. 실제로 그렇게 쓴다 —
+ * 등록이 켤 때 한 번뿐이면 서버 행이 죽었을 때(발송 실패로 비활성화, FID 회전
+ * 등) 되살릴 방법이 없다. 매 실행마다 register()를 다시 태워서 서버가 upsert로
+ * 되살리게 한다.
  *
  * FID는 여기서 돌려주지 않는다. register()는 등록을 시작만 하고 FID는
  * onRegistered 콜백으로 온다 — 구독은 components/push-bridge.tsx가 맡는다.
  * Installations의 getId()로 직접 뽑으면 안 된다. 그건 FCM 등록 성공 여부와
  * 무관하게 값을 주기 때문에, 배달되지 않는 FID를 서버에 심게 된다.
- *
- * iOS Safari는 requestPermission()을 사용자 제스처 핸들러 안에서 호출해야
- * 프롬프트가 뜬다. 권한이 아직 "default"일 때는 반드시 클릭에서 호출할 것.
  */
-export async function requestPushRegistration() {
+export async function ensurePushRegistration() {
+  if (getPushPermission() !== "granted") return false;
+
   const messaging = await getMessagingIfSupported();
   if (!messaging) {
     // 실패 지점을 남긴다. 배포 빌드에서 알림이 안 오는 이유가 미지원 환경인지
@@ -56,12 +60,6 @@ export async function requestPushRegistration() {
     return false;
   }
 
-  const permission = await Notification.requestPermission();
-  if (permission !== "granted") {
-    console.warn(`[push] 알림 권한이 "${permission}" 상태예요.`);
-    return false;
-  }
-
   const serviceWorkerRegistration = await registerFcmServiceWorker();
   await register(messaging, {
     vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
@@ -69,6 +67,32 @@ export async function requestPushRegistration() {
   });
 
   return true;
+}
+
+/**
+ * 권한을 물어보고 이 기기를 등록한다. 알림 화면의 CTA에서만 부른다.
+ *
+ * 권한 요청이 가장 먼저다. iOS Safari는 사용자 제스처가 살아 있는 동안 호출한
+ * requestPermission()에만 프롬프트를 띄우는데, 앞에 await가 하나라도 끼면
+ * 제스처가 끊겨 프롬프트 없이 조용히 실패한다. 지원 여부 판별(isSupported는
+ * 비동기다)은 권한을 받은 뒤로 미룬다.
+ *
+ * Notification 존재 확인만 동기라서 앞에 둘 수 있다. 이게 없으면 알림 자체가
+ * 없는 환경에서 requestPermission 접근이 그대로 터진다.
+ */
+export async function requestPushRegistration() {
+  if (typeof Notification === "undefined") {
+    console.warn("[push] 이 환경에는 Notification API가 없어요.");
+    return false;
+  }
+
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    console.warn(`[push] 알림 권한이 "${permission}" 상태예요.`);
+    return false;
+  }
+
+  return ensurePushRegistration();
 }
 
 /**

@@ -5,6 +5,7 @@ import { useToast } from "@astryxdesign/core/Toast";
 import { getMessagingIfSupported } from "../lib/firebase";
 import {
   clearStoredRegistrationId,
+  ensurePushRegistration,
   readStoredRegistrationId,
   writeStoredRegistrationId,
 } from "../lib/push";
@@ -18,7 +19,8 @@ import { useUserQuery } from "../hooks/query/useUserQuery";
  *
  * 1. FID 등록/해제 → 서버 동기화. register()는 FID를 반환하지 않고
  *    onRegistered로 흘려보내므로, 서버에 올리는 건 여기서 한다. FCM이 FID를
- *    회전시켜도 같은 경로로 들어와 자동으로 맞춰진다.
+ *    회전시켜도 같은 경로로 들어와 자동으로 맞춰진다. 권한이 이미 허용된
+ *    기기는 실행할 때마다 register()를 다시 태워 죽은 서버 행을 되살린다.
  * 2. 포그라운드 수신 → 인앱 토스트. 브라우저는 탭이 활성일 때 알림을 자동
  *    표시하지 않아서, 이게 없으면 앱을 보고 있는 동안 온 알림은 사라진다.
  * 3. 알림 클릭 → 딥링크 이동. 서비스 워커가 보낸 PUSH_NAVIGATE를 받는다.
@@ -71,6 +73,14 @@ function PushBridge() {
             );
         }),
       ];
+
+      // 이미 허용해둔 기기는 실행할 때마다 다시 등록한다. 등록이 "알림 켜기"를
+      // 누른 그 순간뿐이면, 서버 행이 죽거나(발송 실패로 비활성화) FID가
+      // 회전한 뒤로는 알림이 영영 오지 않는다. 프롬프트는 뜨지 않는다.
+      // 리스너를 붙인 뒤에 불러야 onRegistered로 오는 FID를 놓치지 않는다.
+      void ensurePushRegistration().catch((error: unknown) =>
+        console.warn("[push] 기기 재등록에 실패했어요", error),
+      );
     });
 
     return () => {

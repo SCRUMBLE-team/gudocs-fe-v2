@@ -13,9 +13,10 @@ import { useUserQuery } from "./query/useUserQuery";
 /**
  * 푸시 알림 권한을 관리한다.
  *
- * 자동 등록은 하지 않는다. 권한 요청은 알림 화면(activities/notification)의
- * 버튼에서만 시작한다 — 맥락 없이 뜬 프롬프트는 거절당하기 쉽고, 한번 거절되면
- * 코드로 다시 띄울 방법이 없다.
+ * 권한 요청은 알림 화면(activities/notification)의 버튼에서만 시작한다 — 맥락
+ * 없이 뜬 프롬프트는 거절당하기 쉽고, 한번 거절되면 코드로 다시 띄울 방법이
+ * 없다. 이미 허용된 기기를 FCM에 다시 등록하는 건 프롬프트가 없는 일이라
+ * push-bridge가 실행할 때마다 알아서 한다.
  *
  * FID를 서버에 올리는 건 여기가 아니라 components/push-bridge.tsx다.
  * register()는 등록을 시작만 하고 FID는 onRegistered 콜백으로 오기 때문에,
