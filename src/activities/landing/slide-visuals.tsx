@@ -104,7 +104,7 @@ export function OverviewVisual() {
 export function SavingsVisual() {
   return (
     <PreviewStage>
-      <PreviewCard className="absolute inset-x-6 top-6 z-10">
+      <PreviewCard className="absolute inset-x-6 top-4 z-10">
         <span className="text-xs font-semibold text-secondary">지난달보다</span>
         <p className="mt-1 text-[24px] font-bold leading-[1.2] tracking-[-0.03em] text-primary">
           <span className="text-accent tabular-nums">{SAVED}</span>
@@ -128,9 +128,10 @@ export function SavingsVisual() {
           </div>
         </div>
 
-        {/* 카드 위쪽이 절약 금액으로 꽉 차 있어 차트는 낮게 깐다. */}
+        {/* 카드 위쪽이 절약 금액으로 꽉 차 있어 차트는 낮게 깐다. 이 높이가
+            커지면 카드가 무대(300px) 밖으로 나가 캐러셀이 세로로 스크롤된다. */}
         <div className="mt-3.5">
-          <PreviewBars bars={MONTHLY_BARS} hasLabels height={56} />
+          <PreviewBars bars={MONTHLY_BARS} hasLabels height={48} />
         </div>
       </PreviewCard>
     </PreviewStage>
