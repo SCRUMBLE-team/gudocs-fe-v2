@@ -67,6 +67,7 @@ function FeatureCarousel() {
    */
   const dragState = useRef<{
     startX: number;
+    startY: number;
     startScrollLeft: number;
     hasMoved: boolean;
   } | null>(null);
@@ -156,6 +157,7 @@ function FeatureCarousel() {
     event.preventDefault();
     dragState.current = {
       startX: event.clientX,
+      startY: event.clientY,
       startScrollLeft: scroller.scrollLeft,
       hasMoved: false,
     };
@@ -167,8 +169,16 @@ function FeatureCarousel() {
     if (!scroller || !drag) return;
 
     const distance = event.clientX - drag.startX;
+    const verticalDistance = event.clientY - drag.startY;
     // 살짝 눌린 정도로 스냅을 끄면 그냥 클릭한 경우까지 드래그로 잡힌다.
     if (!drag.hasMoved && Math.abs(distance) < DRAG_THRESHOLD) return;
+
+    // 첫 판정에서 세로로 더 많이 움직였으면 이 제스처는 캐러셀 것이 아니다.
+    // 한 번 방향을 정하면 도중에 바뀌지 않도록 그대로 놓아준다.
+    if (!drag.hasMoved && Math.abs(verticalDistance) > Math.abs(distance)) {
+      dragState.current = null;
+      return;
+    }
 
     if (!drag.hasMoved) {
       drag.hasMoved = true;
@@ -209,7 +219,9 @@ function FeatureCarousel() {
         role="group"
         aria-roledescription="carousel"
         aria-label="gudocs 기능 소개"
-        className={`flex w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+        // overflow-y를 명시적으로 막는다. overflow-x만 지정하면 세로도 auto가 돼서
+        // 슬라이드가 몇 px만 넘쳐도 위아래로 끌리고, 그만큼 화면이 흔들린다.
+        className={`flex w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
           isDragging ? "cursor-grabbing select-none" : "cursor-grab"
         }`}
         onPointerDown={handlePointerDown}
