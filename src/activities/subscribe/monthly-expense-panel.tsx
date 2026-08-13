@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import type { MonthlyDetailData } from "../../types/expenses";
 import ServiceLogo from "../../components/service-logo";
 import { formatWon } from "../../utils/format";
-import { toDayOfMonth } from "../../utils/date";
+import { anchorDayOf, hasAmountIn } from "../../utils/expenses";
 import { useFlow } from "@stackflow/react";
 
 type Props = {
@@ -91,10 +91,9 @@ function MonthlyExpensePanel({ subscriptions, year, month }: Props) {
   /*
    * 오늘을 기준으로 "결제 예정"과 "결제 완료"로 가른다.
    *
-   * 항목이 들고 있는 건 최초 결제일(firstBillingDate)뿐이라 매달 반복되는
-   * 결제일은 그 '일(day)'만 의미가 있다. 보고 있는 연·월에 그 일을 붙여
-   * 실제 날짜를 만든 뒤 오늘과 견준다. 그래서 지난달을 보면 전부 완료로,
-   * 다음 달을 보면 전부 예정으로 떨어진다.
+   * 항목이 들고 있는 건 그 달의 청구일이라 '일(day)'만 꺼내 쓴다. 보고 있는
+   * 연·월에 그 일을 붙여 실제 날짜를 만든 뒤 오늘과 견준다. 그래서 지난달을
+   * 보면 전부 완료로, 다음 달을 보면 전부 예정으로 떨어진다.
    *
    * 오늘 결제되는 건은 예정에 넣는다. 아직 빠져나가지 않았을 수 있고,
    * 사용자가 확인해야 할 쪽도 이쪽이다.
@@ -102,7 +101,10 @@ function MonthlyExpensePanel({ subscriptions, year, month }: Props) {
   const { upcoming, past } = useMemo(() => {
     const byDay = new Map<number, MonthlyDetailData["subscriptions"]>();
     for (const item of subscriptions) {
-      const day = toDayOfMonth(item.firstBillingDate);
+      // 그 달에 나가는 돈이 없는 항목(정지된 달)은 결제 일정에 자리가 없다.
+      // 호출부에서 이미 걸러 넘기지만, 0원 행이 새면 없는 결제가 목록에 생긴다.
+      if (!hasAmountIn(item)) continue;
+      const day = anchorDayOf(item);
       const list = byDay.get(day) ?? [];
       list.push(item);
       byDay.set(day, list);

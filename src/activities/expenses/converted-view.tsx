@@ -1,12 +1,13 @@
 import { useExpensesTrendsQuery } from "../../hooks/query/useExpensesTrendsQuery";
 import { useMonthlyExpenseQuery } from "../../hooks/query/useMonthlyExpenseQuery";
 import { useMonthlyExpenseDetailQuery } from "../../hooks/query/useMonthlyExpensesDetailsQuery";
-import { toDayOfMonth, type YearMonth } from "../../utils/date";
+import { type YearMonth } from "../../utils/date";
 import { useSubscriptionsQuery } from "../../hooks/query/useSubscriptionsQuery";
 import {
+  anchorDayOf,
   earliestSubscribedMonth,
   isListed,
-  isPaused,
+  isPausedInMonth,
   recentTrend,
 } from "../../utils/expenses";
 import { formatWon } from "../../utils/format";
@@ -43,6 +44,11 @@ function ConvertedView({
   // 기간을 과거로 옮길 수 있는 하한을 구하려고 전체 구독을 받는다.
   const { data: subscriptions } = useSubscriptionsQuery({});
 
+  /*
+   * 청구가 없던 구독도 서버가 0원 행으로 내려준다(그 달에 존재했고 삭제되지
+   * 않은 것 전부). 전에는 정지 구독이 응답에서 빠져 목록에서 통째로 사라졌고,
+   * 프론트가 이번 달에 한해 구독 목록에서 찾아 직접 붙이고 있었다.
+   */
   const rows: ExpenseRow[] = detail.subscriptions
     .filter(isListed)
     .map((item) => ({
@@ -55,8 +61,13 @@ function ConvertedView({
         item.billingCycle === "YEARLY"
           ? `연 ${formatWon(item.originalPrice)} ÷ 12`
           : undefined,
-      day: toDayOfMonth(item.firstBillingDate),
-      isPaused: isPaused(item),
+      /*
+       * 월 환산은 결제가 실제로 도래했는지와 무관하게 매달 금액이 잡히므로,
+       * 그 달의 청구일이 아니라 앵커 기준 반복 결제일에 놓는다. 금액이 아예
+       * 없는 행(그 달 정지)만 날짜 없이 "이 달 청구 없음"으로 내린다.
+       */
+      day: item.appliedMonthlyAmount > 0 ? anchorDayOf(item) : null,
+      isPaused: isPausedInMonth(item),
     }));
 
   return (

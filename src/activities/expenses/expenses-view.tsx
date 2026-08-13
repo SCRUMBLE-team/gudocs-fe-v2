@@ -26,13 +26,12 @@ export type ExpenseRow = {
   amount: number;
   /** 금액이 왜 이 값인지 설명하는 보조 문구. 월간 구독은 없다. */
   note?: string;
-  /** 결제일(일). 일자별 그룹핑에 쓴다. */
-  day: number;
+  /** 그 달의 결제일(일). 일자별 그룹핑에 쓴다. 그 달에 청구가 없으면 null. */
+  day: number | null;
   /**
-   * 지금 이 순간 일시정지 상태인 구독. 흐리게 그리고 뱃지를 다는 표시용이다.
+   * 그 달에 결제가 멈춰 있던 구독. 흐리게 그리고 뱃지를 다는 표시용이다.
    *
-   * 금액 계산에 쓰면 안 된다. 이 값은 그 달의 상태가 아니라 오늘의 상태라서,
-   * 6월에 정상 청구된 구독이 오늘 정지됐다는 이유로 6월 합계에서 빠진다.
+   * 금액 계산에 쓰면 안 된다. 합계에서 빼면 실제로 나간 돈이 화면에서 사라진다.
    */
   isPaused: boolean;
 };
@@ -236,16 +235,28 @@ function TrendChart({
   );
 }
 
+/**
+ * 청구가 없던 구독을 모으는 가짜 일자.
+ *
+ * 실제 일(1~31)보다 작아야 정렬(내림차순)에서 맨 뒤로 밀린다. 이 그룹은
+ * 날짜 대신 "이 달 청구 없음"으로 헤더를 그린다.
+ */
+const NO_BILLING_DAY = 0;
+
 /** 결제일별로 묶은 구독 목록. 일자 내림차순, 그룹 헤더에 그 날 합계. */
 function ExpenseList({ rows, month }: { rows: ExpenseRow[]; month: number }) {
   const { push } = useFlow();
 
   const groupsByDay = useMemo(() => {
+    // 청구가 없던 구독(day === null)은 날짜가 없으니 NO_BILLING_DAY 하나로 모아
+    // 맨 아래에 따로 둔다. 없는 날짜를 지어내 특정 일자에 끼워 넣으면 그 날
+    // 돈이 나간 것처럼 읽힌다.
     const byDay = new Map<number, ExpenseRow[]>();
     for (const row of rows) {
-      const list = byDay.get(row.day) ?? [];
+      const key = row.day ?? NO_BILLING_DAY;
+      const list = byDay.get(key) ?? [];
       list.push(row);
-      byDay.set(row.day, list);
+      byDay.set(key, list);
     }
     return [...byDay.entries()]
       .sort(([dayA], [dayB]) => dayB - dayA)
@@ -271,12 +282,19 @@ function ExpenseList({ rows, month }: { rows: ExpenseRow[]; month: number }) {
       {groupsByDay.map(({ day, items, total }) => (
         <VStack key={day} gap={1}>
           <HStack justify="between" align="center" paddingInline={1}>
-            <Text type="body" weight="bold">
-              {month}월 {day}일
+            <Text
+              type="body"
+              weight="bold"
+              color={day === NO_BILLING_DAY ? "secondary" : "primary"}
+            >
+              {day === NO_BILLING_DAY ? "이 달 청구 없음" : `${month}월 ${day}일`}
             </Text>
-            <Text type="body" weight="bold" color="accent">
-              {formatWon(total)}
-            </Text>
+            {/* 청구가 없던 그룹은 0원만 반복해 찍히므로 금액을 비운다. */}
+            {day !== NO_BILLING_DAY && (
+              <Text type="body" weight="bold" color="accent">
+                {formatWon(total)}
+              </Text>
+            )}
           </HStack>
           <List>
             {items.map((item) => (

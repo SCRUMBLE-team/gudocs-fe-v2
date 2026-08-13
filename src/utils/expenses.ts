@@ -1,6 +1,6 @@
 import type { MonthlyDetailData, TrendData } from "../types/expenses";
 import type { SubscriptionDetail } from "../types/subscribe";
-import { compareYearMonth, toYearMonth, type YearMonth } from "./date";
+import { compareYearMonth, toDayOfMonth, type YearMonth } from "./date";
 
 /**
  * 추이 차트에 그릴 최대 개월 수.
@@ -59,24 +59,56 @@ export type BillingItem = MonthlyDetailData["subscriptions"][number];
  *
  * 삭제된 구독만 뺀다 — 서버가 이력 때문에 계속 내려주지만 화면에 띄울 이유가 없다.
  * 일시정지는 결제가 나가지 않을 뿐 구독은 살아 있으므로, 목록에는 두고 흐리게
- * 표시한다(isPaused).
+ * 표시한다(isPausedInMonth).
  */
 export function isListed(item: BillingItem): boolean {
   return !item.deleted;
 }
 
-/** 결제가 멈춘 구독인지. 목록에서 흐리게 그리고 합계에서 뺀다. */
-export function isPaused(item: BillingItem): boolean {
-  return item.status === "PAUSED";
+/**
+ * 그 달에 결제가 멈춰 있던 구독인지. 흐리게 그리고 뱃지를 다는 표시용이다.
+ *
+ * 오늘 상태(status)가 아니라 그 달의 상태를 본다. status로 판단하면 6월에
+ * 정상 청구된 구독이 오늘 정지됐다는 이유로 6월 목록에서 정지로 보인다.
+ *
+ * 금액 계산에는 쓰지 않는다. 금액은 언제나 서버가 준 값을 그대로 쓴다.
+ */
+export function isPausedInMonth(item: BillingItem): boolean {
+  return item.statusInMonth === "PAUSED";
 }
 
 /**
- * 이 달에 실제로 청구되는 항목인지.
+ * 그 달 청구일의 '일'. 그 달에 청구가 아예 없으면 null이다.
  *
- * 월간은 매달 청구된다. 연간은 firstBillingDate와 같은 '월'에만 청구되므로
- * 일(day)은 보지 않는다.
+ * 금액으로는 가를 수 없다 — 연간 구독이 커버 중인 달도, 정지된 달도 그 달
+ * 청구액은 0이다. 둘을 구분하는 단서는 이 날짜뿐이다.
+ *
+ * 주의: 이 날짜가 보고 있는 달 안에 있다는 보장은 없다. 연간 구독이 커버 중인
+ * 달이면 실제로 결제된 다른 달의 날짜가 온다.
  */
-export function isBilledIn(item: BillingItem, month: number): boolean {
-  if (item.billingCycle === "MONTHLY") return true;
-  return toYearMonth(item.firstBillingDate).month === month;
+export function billedDayOf(item: BillingItem): number | null {
+  return item.billingDate ? toDayOfMonth(item.billingDate) : null;
+}
+
+/**
+ * 그 달에 돈이 얽혀 있는 항목인지.
+ *
+ * 상세 응답에는 그 달에 청구가 하나도 없던 구독도 0원 행으로 담긴다. 결제
+ * 일정처럼 "언제 얼마가 나가는가"만 그리는 화면에서는 놓을 자리가 없다.
+ */
+export function hasAmountIn(item: BillingItem): boolean {
+  return (
+    item.appliedMonthlyAmount > 0 ||
+    item.billedAmount > 0 ||
+    item.scheduledAmount > 0
+  );
+}
+
+/**
+ * 앵커(최초 결제일) 기준으로 매달 반복되는 결제일의 '일'. 항상 있다.
+ *
+ * 그 달 청구 기록이 아직 없을 때(결제일 전) 어느 날에 놓을지의 기준이 된다.
+ */
+export function anchorDayOf(item: BillingItem): number {
+  return toDayOfMonth(item.firstBillingDate);
 }

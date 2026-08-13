@@ -1,6 +1,6 @@
 import type { MonthlyDetailData } from "../types/expenses";
 import type { SubscribeCategory } from "../types/subscribe";
-import { isListed, isPaused } from "./expenses";
+import { isListed, isPausedInMonth } from "./expenses";
 
 /** 정리 시뮬레이터 한 줄. 화면이 그리는 데 필요한 값만 남긴다. */
 export type SavingsRow = {
@@ -43,7 +43,7 @@ export function buildSavingsRows(
     category: item.category,
     categoryName: item.categoryName,
     monthlyAmount: item.appliedMonthlyAmount,
-    isPaused: isPaused(item),
+    isPaused: isPausedInMonth(item),
   }));
 }
 
