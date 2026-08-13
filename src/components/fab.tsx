@@ -38,7 +38,7 @@ function Fab({ onClick, label = "구독 추가" }: FabProps) {
       aria-label={label}
       align="center"
       justify="center"
-      className="absolute bottom-20 right-4 z-40 h-14 w-14 rounded-full bg-[var(--color-background-blue)] text-[var(--color-text-blue)] shadow-xl transition-transform active:scale-95"
+      className="absolute bottom-20 right-4 z-40 h-14 w-14 rounded-full bg-[#1F4DF3] text-white shadow-3xl transition-transform active:scale-95"
     >
       <PlusIcon className="h-7 w-7" />
     </HStack>

@@ -33,7 +33,7 @@ export function TabBarItem({
       aria-selected={isActive}
       onClick={onClick}
       gap={0.5}
-      paddingBlock={1.5}
+      paddingBlock={2}
       align="center"
       className="flex-1 transition-transform active:scale-95"
     >
