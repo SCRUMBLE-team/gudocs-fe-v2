@@ -62,3 +62,9 @@ export async function changePassword({
 
   return response.data;
 }
+
+export async function expireUser() {
+  const response =
+    await http.delete<ApiResponse<{ data: null }>>("/api/users/me");
+  return response.data;
+}

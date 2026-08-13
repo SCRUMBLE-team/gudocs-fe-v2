@@ -11,8 +11,10 @@ import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
 import { useToast } from "@astryxdesign/core/Toast";
 import TabLayout from "../layout";
+import ExpireAccountSheet from "./expire-account-sheet";
 import InstallGuideSheet from "./install-guide-sheet";
 import { APP_REVIEW_FORM_URL, OPEN_KAKAO_URL } from "../../constants/links";
+import { useExpireUserMutation } from "../../hooks/query/useExpireUserMutation";
 import { useLogoutMutation } from "../../hooks/query/useLogoutMutation";
 import { useUserQuery } from "../../hooks/query/useUserQuery";
 import { useInstallPrompt } from "../../hooks/useInstallPrompt";
@@ -23,9 +25,11 @@ const MyActivity: StaticActivityComponentType<"My"> = () => {
   const { replace } = useFlow();
   const showToast = useToast();
   const logoutMutation = useLogoutMutation();
+  const expireUserMutation = useExpireUserMutation();
   const { disable } = usePushNotification();
   const { canPrompt, install } = useInstallPrompt();
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isExpireOpen, setIsExpireOpen] = useState(false);
 
   async function handleLogout() {
     // 푸시 해제가 먼저다. DELETE /api/push-registrations는 세션 쿠키로
@@ -39,6 +43,25 @@ const MyActivity: StaticActivityComponentType<"My"> = () => {
     } catch {
       showToast({
         body: "로그아웃에 실패했어요. 잠시 후 다시 시도해주세요.",
+        type: "error",
+        isAutoHide: true,
+        autoHideDuration: 3000,
+      });
+    }
+  }
+
+  async function handleExpireUser() {
+    // 로그아웃과 같은 이유로 푸시 해제가 먼저다. 탈퇴가 먼저 나가면 세션이
+    // 끊겨 DELETE /api/push-registrations가 401로 실패한다.
+    await disable();
+
+    try {
+      await expireUserMutation.mutateAsync();
+      replace("Landing", {}, { animate: false });
+    } catch {
+      setIsExpireOpen(false);
+      showToast({
+        body: "탈퇴에 실패했어요. 잠시 후 다시 시도해주세요.",
         type: "error",
         isAutoHide: true,
         autoHideDuration: 3000,
@@ -95,10 +118,20 @@ const MyActivity: StaticActivityComponentType<"My"> = () => {
               endContent={<Icon icon="externalLink" size="sm" />}
             />
             <ListItem label="로그아웃" onClick={handleLogout} />
+            <ListItem
+              label="계정탈퇴"
+              onClick={() => setIsExpireOpen(true)}
+            />
           </List>
         </VStack>
       </TabLayout>
       <InstallGuideSheet isOpen={isGuideOpen} onOpenChange={setIsGuideOpen} />
+      <ExpireAccountSheet
+        isOpen={isExpireOpen}
+        onOpenChange={setIsExpireOpen}
+        onConfirm={handleExpireUser}
+        isPending={expireUserMutation.isPending}
+      />
     </AppScreen>
   );
 };
