@@ -54,7 +54,7 @@ function FloatingLogos() {
 function PreviewStage({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="relative mx-auto mt-7 h-[278px] w-full max-w-[350px]"
+      className="relative mx-auto mt-6 h-[300px] w-full max-w-[350px]"
       aria-hidden="true"
     >
       <div className="absolute inset-x-5 bottom-0 top-5 rounded-[32px] bg-accent-muted" />
@@ -69,7 +69,7 @@ export function OverviewVisual() {
     <PreviewStage>
       <FloatingLogos />
 
-      <PreviewCard className="absolute inset-x-10 top-10 z-10">
+      <PreviewCard className="absolute inset-x-10 top-8 z-10">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-secondary">
             이번 달 구독료
@@ -104,17 +104,15 @@ export function OverviewVisual() {
 export function SavingsVisual() {
   return (
     <PreviewStage>
-      <PreviewCard className="absolute inset-x-6 top-8 z-10">
-        <span className="text-xs font-semibold text-secondary">
-          지난달보다
-        </span>
-        <p className="mt-1 text-[26px] font-bold leading-tight tracking-[-0.03em] text-primary">
+      <PreviewCard className="absolute inset-x-6 top-6 z-10">
+        <span className="text-xs font-semibold text-secondary">지난달보다</span>
+        <p className="mt-1 text-[24px] font-bold leading-[1.2] tracking-[-0.03em] text-primary">
           <span className="text-accent tabular-nums">{SAVED}</span>
           <br />덜 쓰고 있어요
         </p>
 
-        <div className="mt-4 flex items-center gap-3">
-          <div className="flex-1 rounded-2xl bg-[var(--color-background-muted)] px-3 py-2">
+        <div className="mt-3.5 flex items-center gap-2.5">
+          <div className="flex-1 rounded-2xl bg-[var(--color-background-muted)] px-3 py-1.5">
             <span className="text-[11px] font-medium text-secondary">
               지난달
             </span>
@@ -122,7 +120,7 @@ export function SavingsVisual() {
               {LAST_MONTH}
             </p>
           </div>
-          <div className="flex-1 rounded-2xl bg-accent-muted px-3 py-2">
+          <div className="flex-1 rounded-2xl bg-accent-muted px-3 py-1.5">
             <span className="text-[11px] font-medium text-accent">이번 달</span>
             <p className="text-sm font-bold text-accent tabular-nums">
               {THIS_MONTH}
@@ -130,8 +128,9 @@ export function SavingsVisual() {
           </div>
         </div>
 
-        <div className="mt-4">
-          <PreviewBars bars={MONTHLY_BARS} hasLabels />
+        {/* 카드 위쪽이 절약 금액으로 꽉 차 있어 차트는 낮게 깐다. */}
+        <div className="mt-3.5">
+          <PreviewBars bars={MONTHLY_BARS} hasLabels height={56} />
         </div>
       </PreviewCard>
     </PreviewStage>
@@ -147,17 +146,9 @@ export function SavingsVisual() {
 export function AlertVisual() {
   return (
     <PreviewStage>
-      {/* 뒤에 깔린 카드. 내용은 앞 카드에 가려도 되고, 겹침만 보이면 된다. */}
-      <PreviewCard className="absolute inset-x-12 top-6 z-0 opacity-70">
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-accent-muted px-2 py-0.5 text-[11px] font-semibold text-accent">
-            결제 예정
-          </span>
-          <span className="text-xs font-medium text-secondary">어제</span>
-        </div>
-      </PreviewCard>
-
-      <PreviewCard className="absolute inset-x-7 top-14 z-10">
+      {/* 가격 변경 알림이 위, 결제 예정 알림이 아래. 살짝 겹쳐 두면 알림이
+          쌓인다는 게 한눈에 읽힌다. */}
+      <PreviewCard className="absolute inset-x-6 top-16 z-10">
         <div className="flex items-center gap-2">
           <img
             src={netflixLogo}
@@ -172,22 +163,23 @@ export function AlertVisual() {
           Netflix 요금제가 변경될 예정이에요
         </p>
         <p className="mt-1 text-xs font-medium text-secondary tabular-nums">
-          13,500원 → <span className="text-primary">17,000원</span> · 7월 1일부터
+          13,500원 → <span className="text-primary">17,000원</span> ·{" "}
+          <span className="text-accent">7월 1일</span>부터
         </p>
+      </PreviewCard>
 
-        <div className="mt-4 flex items-center justify-between rounded-2xl bg-[var(--color-background-muted)] px-3 py-2.5">
-          <div>
-            <p className="text-xs font-medium text-secondary">
-              3일 뒤 Netflix가 결제돼요
-            </p>
-            <p className="text-[11px] font-medium text-secondary">
-              다음 결제까지
-            </p>
-          </div>
-          <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-bold text-[var(--color-on-accent)]">
-            D-3
-          </span>
+      <PreviewCard className="absolute inset-x-10 top-[173px] z-20 flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-medium text-secondary">
+            다음 결제까지
+          </p>
+          <p className="mt-0.5 text-sm font-bold text-primary">
+            3일 뒤 Netflix가 결제돼요
+          </p>
         </div>
+        <span className="shrink-0 rounded-full bg-accent px-2.5 py-1 text-xs font-bold text-[var(--color-on-accent)]">
+          D-3
+        </span>
       </PreviewCard>
     </PreviewStage>
   );

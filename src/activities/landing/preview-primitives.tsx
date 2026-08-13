@@ -40,13 +40,19 @@ export type PreviewBar = {
 export function PreviewBars({
   bars,
   hasLabels = false,
+  height = 80,
 }: {
   bars: PreviewBar[];
   hasLabels?: boolean;
+  /** 차트 영역 높이(px). 카드에 다른 정보가 많은 슬라이드는 낮춰 쓴다. */
+  height?: number;
 }) {
   return (
     <div>
-      <div className="flex h-20 items-end justify-between gap-2 border-b border-border px-1">
+      <div
+        className="flex items-end justify-between gap-2 border-b border-border px-1"
+        style={{ height }}
+      >
         {bars.map((bar) => (
           <div
             key={bar.label}

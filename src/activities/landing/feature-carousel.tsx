@@ -44,8 +44,11 @@ const DRAG_THRESHOLD = 4;
  * autoplay는 쓰지 않는다 — 읽는 도중에 화면이 넘어가면 오히려 놓친다.
  *
  * 드래그 중에는 scroll-snap을 잠깐 끈다. 켜둔 채로 scrollLeft를 직접 만지면
- * 브라우저가 매 프레임 스냅을 되돌려서 손가락을 따라오지 않는다. 손을 떼는
- * 순간 가장 가까운 슬라이드로 직접 스크롤해 애매한 위치에 멈추지 않게 한다.
+ * 브라우저가 매 프레임 스냅을 되돌려서 손가락을 따라오지 않는다. 손을 떼면
+ * 가장 가까운 슬라이드로 옮겨 애매한 위치에 멈추지 않게 한다.
+ *
+ * 코드로 자리를 옮기는 동안에도 스냅은 꺼둔다(scrollToIndex 주석 참고).
+ * 사람이 직접 스와이프·트랙패드로 넘기는 평소에는 CSS 스냅만으로 돌아간다.
  */
 function FeatureCarousel() {
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -73,10 +76,48 @@ function FeatureCarousel() {
     return () => scroller.removeEventListener("scroll", handleScroll);
   }, []);
 
+  /** 스냅을 다시 켤 타이머. 옮기는 도중에 또 옮기면 앞의 예약은 버린다. */
+  const restoreTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (restoreTimer.current !== null) clearTimeout(restoreTimer.current);
+    },
+    [],
+  );
+
+  /**
+   * 슬라이드 하나만큼 자리를 옮긴다. dot을 눌렀을 때와 드래그를 놓았을 때 공통.
+   *
+   * 옮기는 동안에는 스냅을 끈다. 스냅이 켜진 채로 애니메이션하면 크롬이 도착한
+   * 뒤 출발했던 슬라이드로 도로 끌어당긴다(420까지 갔다가 0으로 돌아왔다).
+   * 도착할 때쯤 다시 켜면 이후 스와이프는 평소대로 스냅된다.
+   */
   function scrollToIndex(index: number) {
     const scroller = scrollerRef.current;
     if (!scroller) return;
+
+    setSnapEnabled(scroller, false);
     scroller.scrollTo({ left: index * scroller.clientWidth, behavior: "smooth" });
+
+    if (restoreTimer.current !== null) clearTimeout(restoreTimer.current);
+    // scrollend는 iOS Safari 지원이 늦어 타이머로 되돌린다. 스크롤 애니메이션은
+    // 길어야 300ms대라 넉넉히 잡아도 사용자가 다음 동작을 하기 전에 끝난다.
+    restoreTimer.current = window.setTimeout(
+      () => setSnapEnabled(scroller, true),
+      500,
+    );
+  }
+
+  /**
+   * 스냅 on/off.
+   *
+   * 클래스가 아니라 인라인 스타일로 직접 켜고 끈다. state로 바꾸면 리렌더가
+   * 커밋된 다음에야 스타일이 반영돼서, 손을 뗀 직후 자리를 잡는 스크롤이
+   * 아직 옛 설정으로 실행된다.
+   */
+  function setSnapEnabled(scroller: HTMLDivElement, isOn: boolean) {
+    scroller.style.scrollSnapType = isOn ? "" : "none";
   }
 
   function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
@@ -85,6 +126,8 @@ function FeatureCarousel() {
     const scroller = scrollerRef.current;
     if (!scroller) return;
 
+    // 막지 않으면 끄는 동안 카피가 텍스트로 잡혀 파랗게 드래그된다.
+    event.preventDefault();
     dragState.current = {
       startX: event.clientX,
       startScrollLeft: scroller.scrollLeft,
@@ -102,6 +145,9 @@ function FeatureCarousel() {
 
     if (!isDragging) {
       setIsDragging(true);
+      // 예약된 복구가 남아 있으면 드래그 도중에 스냅이 켜져 손을 따라오지 못한다.
+      if (restoreTimer.current !== null) clearTimeout(restoreTimer.current);
+      setSnapEnabled(scroller, false);
       // 커서가 캐러셀 밖으로 나가도 계속 따라오게 한다.
       event.currentTarget.setPointerCapture(event.pointerId);
     }
@@ -129,10 +175,8 @@ function FeatureCarousel() {
         role="group"
         aria-roledescription="carousel"
         aria-label="gudocs 기능 소개"
-        className={`flex w-full overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-          isDragging
-            ? "cursor-grabbing snap-none select-none"
-            : "cursor-grab snap-x snap-mandatory"
+        className={`flex w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+          isDragging ? "cursor-grabbing select-none" : "cursor-grab"
         }`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
