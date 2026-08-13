@@ -6,6 +6,7 @@ import { Text } from "@astryxdesign/core/Text";
 import netflixLogo from "../../assets/logo/service/NETFLIX.png";
 import youtubePremiumLogo from "../../assets/logo/service/YOUTUBE_PREMIUM.png";
 import chatGptLogo from "../../assets/logo/service/CHATGPT.png";
+import logo from "../../assets/logo/logo.svg";
 
 const MONTHLY_BARS = [34, 52, 44, 72, 58, 86];
 
@@ -19,7 +20,11 @@ function SubscriptionPreview() {
       <div className="absolute inset-x-5 bottom-0 top-5 rounded-[32px] bg-accent-muted" />
 
       <div className="absolute left-0 top-3 z-20 grid size-14 place-items-center rounded-2xl border border-border bg-surface shadow-lg">
-        <img src={netflixLogo} alt="" className="size-10 rounded-xl object-cover" />
+        <img
+          src={netflixLogo}
+          alt=""
+          className="size-10 rounded-xl object-cover"
+        />
       </div>
       <div className="absolute right-0 top-16 z-20 grid size-14 place-items-center rounded-2xl border border-border bg-surface shadow-lg">
         <img
@@ -29,7 +34,11 @@ function SubscriptionPreview() {
         />
       </div>
       <div className="absolute bottom-5 left-3 z-20 grid size-12 place-items-center rounded-2xl border border-border bg-surface shadow-lg">
-        <img src={chatGptLogo} alt="" className="size-9 rounded-xl object-cover" />
+        <img
+          src={chatGptLogo}
+          alt=""
+          className="size-9 rounded-xl object-cover"
+        />
       </div>
 
       <div className="absolute inset-x-10 top-10 z-10 rounded-[28px] border border-border bg-surface p-5 shadow-xl">
@@ -78,13 +87,11 @@ const LandingActivity: StaticActivityComponentType<"Landing"> = () => {
       <div className="relative flex min-h-full flex-col overflow-hidden bg-surface px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-[max(24px,env(safe-area-inset-top))]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(circle_at_50%_0%,var(--color-accent-muted),transparent_68%)]" />
 
-        <header className="relative z-10 flex items-center gap-2" aria-label="Gudocs">
-          <div className="grid size-8 place-items-center rounded-xl bg-accent text-sm font-extrabold text-on-accent shadow-sm">
-            G
-          </div>
-          <Text type="large" weight="bold" color="accent">
-            Gudocs
-          </Text>
+        <header
+          className="relative z-10 flex items-center gap-2"
+          aria-label="Gudocs"
+        >
+          <img src={logo} alt="" className="h-8 w-auto" />
         </header>
 
         <main className="relative z-10 flex flex-1 flex-col justify-center py-6">
@@ -97,7 +104,7 @@ const LandingActivity: StaticActivityComponentType<"Landing"> = () => {
               className="whitespace-pre-line text-[30px] leading-[1.25] tracking-[-0.035em]"
             >
               {"구독 관리의 시작,\n"}
-              <span className="text-accent">구Docs</span>
+              <span className="text-accent">Gudocs</span>
             </Text>
             <Text
               as="p"
@@ -106,7 +113,7 @@ const LandingActivity: StaticActivityComponentType<"Landing"> = () => {
               justify="center"
               className="whitespace-pre-line leading-6"
             >
-              {"결제일 알림부터 월별 지출까지\n구Docs에서 한 번에 관리하세요"}
+              {"결제일 알림부터 월별 지출까지\nGudocs에서 한 번에 관리하세요"}
             </Text>
           </VStack>
 
@@ -115,7 +122,7 @@ const LandingActivity: StaticActivityComponentType<"Landing"> = () => {
 
         <VStack className="relative z-10" gap={2}>
           <Button
-            label="구Docs 시작하기"
+            label="Gudocs 시작하기"
             variant="primary"
             size="lg"
             onClick={() => push("Login", {})}
