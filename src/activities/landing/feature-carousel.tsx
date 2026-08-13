@@ -53,12 +53,23 @@ const DRAG_THRESHOLD = 4;
 function FeatureCarousel() {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  // 커서 모양과 텍스트 선택 차단에만 쓴다. 드래그 진행 여부의 판단 기준은
+  // 아래 dragState다 — state는 커밋이 늦어 손을 뗄 때 아직 false일 수 있다.
   const [isDragging, setIsDragging] = useState(false);
 
-  // 드래그 중에만 쓰는 값이라 리렌더가 필요 없다.
-  const dragState = useRef<{ startX: number; startScrollLeft: number } | null>(
-    null,
-  );
+  /**
+   * 진행 중인 드래그. 리렌더가 필요 없어 ref에 둔다.
+   *
+   * hasMoved까지 여기에 두는 게 중요하다. pointermove는 리액트가 연속 이벤트로
+   * 묶어 처리해서 setIsDragging(true)이 커밋되기 전에 pointerup이 먼저 올 수
+   * 있다. 그때 state를 보고 판단하면 손을 뗐는데도 스냅이 꺼진 채로 남아
+   * 슬라이드가 어중간한 위치에 멈춘다.
+   */
+  const dragState = useRef<{
+    startX: number;
+    startScrollLeft: number;
+    hasMoved: boolean;
+  } | null>(null);
 
   /** 스크롤 위치에서 현재 슬라이드를 되읽는다. 스와이프·드래그·트랙패드 공통. */
   useEffect(() => {
@@ -78,10 +89,14 @@ function FeatureCarousel() {
 
   /** 스냅을 다시 켤 타이머. 옮기는 도중에 또 옮기면 앞의 예약은 버린다. */
   const restoreTimer = useRef<number | null>(null);
+  /** 예약해둔 스크롤 프레임. 같은 이유로 하나만 살려둔다. */
+  const pendingFrame = useRef<number | null>(null);
 
   useEffect(
     () => () => {
       if (restoreTimer.current !== null) clearTimeout(restoreTimer.current);
+      if (pendingFrame.current !== null)
+        cancelAnimationFrame(pendingFrame.current);
     },
     [],
   );
@@ -98,7 +113,18 @@ function FeatureCarousel() {
     if (!scroller) return;
 
     setSnapEnabled(scroller, false);
-    scroller.scrollTo({ left: index * scroller.clientWidth, behavior: "smooth" });
+
+    // 한 프레임 미룬다. 드래그로 방금 scrollLeft를 대입한 프레임에서 바로
+    // 부르면 크롬이 부드러운 스크롤을 통째로 무시해서(250에서 그대로 멈췄다)
+    // 손을 뗀 자리에 어중간하게 남는다.
+    if (pendingFrame.current !== null) cancelAnimationFrame(pendingFrame.current);
+    pendingFrame.current = requestAnimationFrame(() => {
+      pendingFrame.current = null;
+      scroller.scrollTo({
+        left: index * scroller.clientWidth,
+        behavior: "smooth",
+      });
+    });
 
     if (restoreTimer.current !== null) clearTimeout(restoreTimer.current);
     // scrollend는 iOS Safari 지원이 늦어 타이머로 되돌린다. 스크롤 애니메이션은
@@ -131,6 +157,7 @@ function FeatureCarousel() {
     dragState.current = {
       startX: event.clientX,
       startScrollLeft: scroller.scrollLeft,
+      hasMoved: false,
     };
   }
 
@@ -141,12 +168,17 @@ function FeatureCarousel() {
 
     const distance = event.clientX - drag.startX;
     // 살짝 눌린 정도로 스냅을 끄면 그냥 클릭한 경우까지 드래그로 잡힌다.
-    if (!isDragging && Math.abs(distance) < DRAG_THRESHOLD) return;
+    if (!drag.hasMoved && Math.abs(distance) < DRAG_THRESHOLD) return;
 
-    if (!isDragging) {
+    if (!drag.hasMoved) {
+      drag.hasMoved = true;
       setIsDragging(true);
-      // 예약된 복구가 남아 있으면 드래그 도중에 스냅이 켜져 손을 따라오지 못한다.
+      // 예약된 복구·스크롤이 남아 있으면 드래그 도중에 끼어들어 손을 따라오지 못한다.
       if (restoreTimer.current !== null) clearTimeout(restoreTimer.current);
+      if (pendingFrame.current !== null) {
+        cancelAnimationFrame(pendingFrame.current);
+        pendingFrame.current = null;
+      }
       setSnapEnabled(scroller, false);
       // 커서가 캐러셀 밖으로 나가도 계속 따라오게 한다.
       event.currentTarget.setPointerCapture(event.pointerId);
@@ -156,10 +188,12 @@ function FeatureCarousel() {
 
   function handlePointerUp(event: React.PointerEvent<HTMLDivElement>) {
     const scroller = scrollerRef.current;
-    if (!scroller || !dragState.current) return;
+    const drag = dragState.current;
+    if (!scroller || !drag) return;
 
     dragState.current = null;
-    if (!isDragging) return;
+    // 끌지 않고 눌렀다 뗀 것뿐이면 스냅을 건드린 적도 없다.
+    if (!drag.hasMoved) return;
 
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
