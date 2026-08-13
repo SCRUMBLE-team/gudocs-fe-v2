@@ -7,6 +7,11 @@ export function getBaseYearMonth() {
   };
 }
 
+/** 오늘 날짜의 일(day). 이 달에 결제가 남았는지 가르는 기준으로 쓴다. */
+export function getTodayDayOfMonth() {
+  return new Date().getDate();
+}
+
 export type YearMonth = { year: number; month: number };
 
 /**

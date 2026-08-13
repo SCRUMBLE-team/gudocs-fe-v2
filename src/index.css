@@ -40,13 +40,22 @@
 }
 
 /* Astryx Toast 뷰포트는 코너 4곳(top/bottom × start/end)만 지원한다.
-   상단 중앙에 띄우기 위해 뷰포트의 가로 위치를 강제로 덮어쓴다.
+   상단 중앙에 띄우기 위해 뷰포트의 가로 정렬을 강제로 덮어쓴다.
    뷰포트는 position: fixed(창 기준)지만 앱이 mx-auto로 가운데 정렬돼 있어
    시각적으로 앱 상단 중앙과 일치한다. 레이어/특이도와 무관하게 이기도록
-   비레이어 규칙 + !important 로 둔다. */
+   비레이어 규칙 + !important 로 둔다.
+
+   좌우를 0으로 벌려둔 채 align-items로만 가운데 정렬한다. left:50%처럼 한쪽
+   앵커만 두면 fixed 요소의 폭이 내용에 맞춰 줄어드는데, 토스트의
+   max-width: min(100%, ...)가 그 폭 없는 부모를 가리켜 0으로 풀린다.
+   그러면 토스트가 좌우 패딩만 남아 글자가 한 자씩 줄바꿈된다. */
 [role="region"][aria-label="Notifications"] {
-  inset-inline: auto !important;
-  left: 50% !important;
-  transform: translateX(-50%);
+  inset-inline: 0 !important;
   align-items: center !important;
+}
+
+/* 한글은 기본값(break normal)이면 어절 중간에서도 줄이 바뀐다. 짧은 안내 문구가
+   대부분이라 어절 단위로 끊어야 읽힌다. */
+[role="region"][aria-label="Notifications"] .astryx-toast {
+  word-break: keep-all;
 }
