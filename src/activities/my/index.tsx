@@ -80,7 +80,11 @@ const MyActivity: StaticActivityComponentType<"My"> = () => {
   return (
     <AppScreen preventSwipeBack>
       <TabLayout>
-        <VStack padding={4} gap={3}>
+        {/*
+          TabLayout의 스크롤 영역에서 남은 높이를 다 차지해야 아래 계정 영역이
+          mt-auto로 화면 바닥에 붙는다. 내용이 길어지면 자연스럽게 아래로 밀린다.
+        */}
+        <VStack padding={4} gap={3} className="flex-1">
           <Card className="border-gray-300">
             <HStack align="center" gap={3}>
               <Avatar alt={user?.name ?? ""} size="medium" />
@@ -117,10 +121,31 @@ const MyActivity: StaticActivityComponentType<"My"> = () => {
               target="_blank"
               endContent={<Icon icon="externalLink" size="sm" />}
             />
+          </List>
+
+          {/*
+            로그아웃·계정탈퇴는 앱 기능이 아니라 계정을 떠나는 동작이라 위 목록과
+            분리해 화면 맨 아래에 둔다. 생김새는 같은 List라 이질감이 없다.
+
+            hasDividers는 마지막 항목에도 아래 선을 넣는데, 목록의 끝이 화면 끝이라
+            선이 붕 뜬다. 위쪽 경계선은 border-t로 직접 긋고 마지막 항목의 아래
+            선만 지운다. (선 색은 astryx 구분선과 같은 --color-border다.)
+          */}
+          <List
+            className="mt-auto border-t border-border"
+            density="spacious"
+            hasDividers
+          >
             <ListItem label="로그아웃" onClick={handleLogout} />
+            {/*
+              라벨 색은 Item이 stylex로 --color-text-primary에 고정하는데, 그 규칙이
+              :not(#\#) 3중으로 특이성을 올려둬서 유틸리티 클래스로는 못 이긴다.
+              되돌릴 수 없는 동작이라 색 구분이 필요하니 important로 덮는다.
+            */}
             <ListItem
               label="계정탈퇴"
               onClick={() => setIsExpireOpen(true)}
+              className="border-b-0! [&_span]:text-error!"
             />
           </List>
         </VStack>

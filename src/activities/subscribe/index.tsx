@@ -27,7 +27,11 @@ const SubscribeActivity: StaticActivityComponentType<"Subscribe"> = ({
     // 탭 루트라 되돌아갈 곳이 없다. 스와이프백을 막아둔다.
     <AppScreen preventSwipeBack>
       <TabLayout>
-        <VStack padding={4} gap={3}>
+        {/*
+          FAB이 스크롤 영역 위에 떠 있어서(bottom-20 + h-14) 목록 맨 아래 행이
+          버튼에 가린다. 스크롤이 그만큼 더 내려가도록 아래쪽만 여백을 더 준다.
+        */}
+        <VStack padding={4} gap={3} className="pb-20">
           <TabList
             className="flex justify-around"
             value={tab}
