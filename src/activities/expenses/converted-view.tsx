@@ -64,6 +64,11 @@ function ConvertedView({
       model={{
         totalAmount: monthly.totalAmount,
         currentAmount: currentMonthly.totalAmount,
+        // 이번 달을 볼 때는 이번 달끼리 비교할 수 없으니 지난달과 견준다.
+        currentMonthNote: {
+          kind: "PREVIOUS",
+          amount: currentMonthly.previousMonthAmount,
+        },
         monthlyAmount: monthly.monthlySubscriptionAmount,
         yearlyAmount: monthly.annualSubscriptionMonthlyConvertedAmount,
         trend: recentTrend(trends.monthlyTrends),

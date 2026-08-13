@@ -2,7 +2,11 @@ import { useExpensesTrendsQuery } from "../../hooks/query/useExpensesTrendsQuery
 import { useMonthlyExpenseQuery } from "../../hooks/query/useMonthlyExpenseQuery";
 import { useMonthlyExpensesQueries } from "../../hooks/query/useMonthlyExpensesQueries";
 import { useMonthlyExpenseDetailQuery } from "../../hooks/query/useMonthlyExpensesDetailsQuery";
-import { toDayOfMonth, type YearMonth } from "../../utils/date";
+import {
+  getTodayDayOfMonth,
+  toDayOfMonth,
+  type YearMonth,
+} from "../../utils/date";
 import { useSubscriptionsQuery } from "../../hooks/query/useSubscriptionsQuery";
 import {
   earliestSubscribedMonth,
@@ -73,10 +77,18 @@ function ActualView({
       isPaused: isPaused(item),
     }));
 
+  // 이번 달에 앞으로 더 빠져나갈 돈. 결제일이 오늘보다 뒤인 항목만 센다.
+  // (일시정지는 결제가 나가지 않으므로 뺀다. rows는 이미 이 달 청구분만 담고 있다.)
+  const today = getTodayDayOfMonth();
+  const upcomingAmount = rows
+    .filter((row) => !row.isPaused && row.day > today)
+    .reduce((sum, row) => sum + row.amount, 0);
+
   return (
     <ExpensesView
       model={{
         totalAmount: monthly.actualAmount,
+        currentMonthNote: { kind: "UPCOMING", amount: upcomingAmount },
         currentAmount: currentMonthly.actualAmount,
         monthlyAmount: monthly.monthlySubscriptionAmount,
         // 실제 청구액에서 월간분을 뺀 나머지가 이 달에 빠져나가는 연간 결제분이다.
