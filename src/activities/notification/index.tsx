@@ -20,10 +20,6 @@ const ALERT_TYPES = [
   { label: "결제 3일 전", description: "미리 정리할 시간을 드려요" },
   { label: "결제 당일", description: "오늘 빠져나가는 금액을 알려드려요" },
   { label: "가격 변동", description: "구독료가 오르면 바로 알려드려요" },
-  {
-    label: "안 쓰는 구독",
-    description: "한동안 손대지 않은 구독을 짚어드려요",
-  },
 ] as const;
 
 /**
